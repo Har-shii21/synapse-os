@@ -1,6 +1,8 @@
 import Sidebar from "../../components/dashboard/Sidebar";
 import Topbar from "../../components/dashboard/Topbar";
 import StatsCards from "../../components/dashboard/StatsCards";
+import AgentPanel from "../../components/dashboard/AgentPanel";
+import ActivityFeed from "../../components/dashboard/ActivityFeed";
 
 export default function Dashboard() {
   return (
@@ -22,6 +24,8 @@ export default function Dashboard() {
           <div className="mt-8">
             <StatsCards />
           </div>
+          <AgentPanel />
+          <ActivityFeed />
         </div>
       </section>
     </main>

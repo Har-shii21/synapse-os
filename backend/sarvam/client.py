@@ -51,4 +51,4 @@ Only output the final 5 numbered steps.
         ):
             steps.append(line)
 
-    return "\n".join(steps[-5:])
+    return "\n".join(sorted(steps[-5:], key=lambda x: int(x.split(".")[0])))

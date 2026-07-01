@@ -1,4 +1,5 @@
 from sarvam.client import ask_sarvam
+from memory.state import update_state
 
 
 class PlannerAgent:
@@ -25,4 +26,6 @@ Return ONLY this format:
 5. Fifth step
 """
 
+        
+        update_state("planner", "completed")
         return ask_sarvam(prompt)

@@ -9,7 +9,7 @@ client = SarvamAI(
 )
 
 
-def ask_sarvam(prompt: str):
+def ask_planner(prompt: str):
 
     response = client.chat.completions(
         model="sarvam-30b",
@@ -18,10 +18,12 @@ def ask_sarvam(prompt: str):
             {
                 "role": "system",
                 "content": """
-You are a planner AI.
-Do not explain your thinking.
-Do not analyze the request.
-Only output the final 5 numbered steps.
+You are a planning AI.
+
+Create exactly 5 numbered steps.
+
+Do not explain.
+Only return the final plan.
 """
             },
             {
@@ -31,24 +33,28 @@ Only output the final 5 numbered steps.
         ]
     )
 
-    message = response.choices[0].message
+    return response.choices[0].message.content
 
-    text = message.reasoning_content or ""
 
-    lines = text.split("\n")
+def ask_reviewer(prompt: str):
 
-    steps = []
+    response = client.chat.completions(
+        model="sarvam-30b",
+        max_tokens=3000,
+        messages=[
+            {
+                "role": "system",
+                "content": """
+You are an expert software reviewer.
 
-    for line in lines:
-        line = line.strip()
+Review the execution and provide constructive feedback.
+"""
+            },
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ]
+    )
 
-        if (
-            line.startswith("1.")
-            or line.startswith("2.")
-            or line.startswith("3.")
-            or line.startswith("4.")
-            or line.startswith("5.")
-        ):
-            steps.append(line)
-
-    return "\n".join(sorted(steps[-5:], key=lambda x: int(x.split(".")[0])))
+    return response.choices[0].message.content

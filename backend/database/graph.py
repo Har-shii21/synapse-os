@@ -17,15 +17,7 @@ class Neo4jConnection:
         )
 
     def close(self):
-        self.driver = GraphDatabase.driver(
-    os.getenv("NEO4J_URI"),
-    auth=(
-        os.getenv("NEO4J_USERNAME"),
-        os.getenv("NEO4J_PASSWORD"),
-    ),
-    max_connection_lifetime=30 * 60,
-    keep_alive=True,
-)
+        self.driver.close()
 
     def save_project(self, task):
         query = """
@@ -36,3 +28,15 @@ class Neo4jConnection:
 
         with self.driver.session() as session:
             session.run(query, task=task)
+
+    def get_projects(self):
+        query = """
+        MATCH (p:Project)
+        RETURN p.task AS task
+        ORDER BY elementId(p) DESC
+        LIMIT 5
+        """
+
+        with self.driver.session() as session:
+            result = session.run(query)
+            return [record["task"] for record in result]

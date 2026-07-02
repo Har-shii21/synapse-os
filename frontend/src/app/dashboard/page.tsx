@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Sidebar from "../../components/dashboard/Sidebar";
 
 export default function Dashboard() {
@@ -8,6 +8,17 @@ export default function Dashboard() {
   const [result, setResult] = useState("");
   const [review, setReview] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [projects, setProjects] = useState<string[]>([]);
+
+  useEffect(() => {
+  async function loadProjects() {
+    const response = await fetch("http://127.0.0.1:8000/projects");
+    const data = await response.json();
+    setProjects(data.projects);
+  }
+
+  loadProjects();
+}, []);
 
   async function runAgent() {
     setLoading(true);
@@ -88,17 +99,31 @@ export default function Dashboard() {
 
     <p>🧠 Planner Agent ✅ Completed</p>
     <p>⚙️ Executor Agent ✅ Completed</p>
-    <p>🔍 Reviewer Agent ✅ {review.status}</p>
+    <p>🔍 Reviewer Agent ✅ Completed</p>
 
-    <p className="mt-3">
-      Tasks completed: {review.completed_tasks}
-    </p>
+    <pre className="mt-4 whitespace-pre-wrap text-slate-300">
+      {review}
+    </pre>
   </div>
 )}
 
           </div>
         )}
+      <div className="mt-8 rounded-xl bg-[#0B1120] p-6">
+  <h2 className="text-xl font-bold">🧠 Memory</h2>
 
+  <div className="mt-4">
+    {projects.length === 0 ? (
+      <p className="text-slate-400">No previous projects</p>
+    ) : (
+      projects.map((project, index) => (
+        <p key={index} className="py-1 text-slate-300">
+          • {project}
+        </p>
+      ))
+    )}
+  </div>
+</div>
       </section>
     </main>
   );

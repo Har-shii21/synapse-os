@@ -4,6 +4,8 @@ from agents.planner import PlannerAgent
 from pydantic import BaseModel
 from agents.executor import ExecutorAgent
 from agents.reviewer import ReviewerAgent
+from memory.state import get_state
+from database.graph import Neo4jConnection
 
 app = FastAPI()
 
@@ -43,4 +45,21 @@ def run_agent(request: TaskRequest):
         "plan": plan,
         "execution": execution,
         "review": review
+    }
+
+@app.get("/workflow-status")
+def workflow_status():
+    return get_state()
+
+@app.get("/projects")
+def get_projects():
+
+    db = Neo4jConnection()
+
+    projects = db.get_projects()
+
+    db.close()
+
+    return {
+        "projects": projects
     }

@@ -1,12 +1,11 @@
 from sarvam.client import ask_sarvam
 from memory.state import update_state
-
+from database.graph import Neo4jConnection
 
 class PlannerAgent:
 
     def __init__(self):
         self.name = "Planner Agent"
-
 
     def run(self, task):
 
@@ -26,6 +25,12 @@ Return ONLY this format:
 5. Fifth step
 """
 
-        
         update_state("planner", "completed")
-        return ask_sarvam(prompt)
+
+        response = ask_sarvam(prompt)
+
+        db = Neo4jConnection()
+        db.save_project(task)
+        db.close()
+
+        return response

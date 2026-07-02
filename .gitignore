@@ -1,0 +1,16 @@
+# Environment
+.env
+**/.env
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Next.js
+node_modules/
+.next/
+
+# Logs
+*.log

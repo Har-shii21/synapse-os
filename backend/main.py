@@ -52,23 +52,20 @@ def save_workflow(task, plan, execution, review):
 
 @app.get("/")
 def home():
-    return {"status": "Synapse Backend Running"}
+    return {"status": "Synapse Backend Running 🚀"}
 
 
 @app.post("/run-agent")
 def run_agent(request: TaskRequest):
 
-    # Planner
     plan = planner.run(request.task)
 
-    # Executor
     tasks = plan.split("\n")
+
     execution = executor.run(tasks)
 
-    # Reviewer
     review = reviewer.run(execution)
 
-    # Save to Replay Memory
     save_workflow(
         request.task,
         plan,
@@ -102,39 +99,35 @@ def get_projects():
     }
 
 
+# -----------------------------
+# LIVE KNOWLEDGE GRAPH
+# -----------------------------
 @app.get("/knowledge-graph")
 def knowledge_graph():
 
-    return {
-        "nodes": [
-            {"id": "core", "label": "🧠 Synapse Core"},
-            {"id": "planner", "label": "Planner"},
-            {"id": "researcher", "label": "Researcher"},
-            {"id": "engineer", "label": "Engineer"},
-            {"id": "security", "label": "Security"},
-            {"id": "analyst", "label": "Analyst"},
-            {"id": "reviewer", "label": "Reviewer"},
-            {"id": "memory", "label": "🧬 Cognitive Memory"},
-        ],
-        "edges": [
-            ["core", "planner"],
-            ["core", "researcher"],
-            ["core", "engineer"],
-            ["core", "security"],
-            ["core", "analyst"],
-            ["core", "reviewer"],
-            ["planner", "memory"],
-            ["reviewer", "memory"],
-        ],
-    }
+    db = Neo4jConnection()
+
+    graph = db.get_graph_data()
+
+    db.close()
+
+    return graph
 
 
+# -----------------------------
+# REPLAY
+# -----------------------------
 @app.get("/replay")
 def get_replay():
+
     return {
         "history": workflow_history[::-1]
     }
 
+
+# -----------------------------
+# ANALYTICS
+# -----------------------------
 @app.get("/analytics")
 def analytics():
 
@@ -142,13 +135,15 @@ def analytics():
 
     projects = db.get_projects()
 
+    graph = db.get_graph_data()
+
     db.close()
 
     return {
         "projects_completed": len(projects),
         "ai_agents": 6,
-        "memory_nodes": len(projects),
-        "knowledge_links": len(projects) * 2,
+        "memory_nodes": len(graph["nodes"]),
+        "knowledge_links": len(graph["edges"]),
         "workflow_success": "98%",
         "reviews_approved": len(workflow_history),
     }

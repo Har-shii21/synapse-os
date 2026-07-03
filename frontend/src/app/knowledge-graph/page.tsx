@@ -7,67 +7,118 @@ import ReactFlow, {
   Background,
   Controls,
   MiniMap,
+  MarkerType,
 } from "reactflow";
 
 import "reactflow/dist/style.css";
 
 export default function KnowledgeGraphPage() {
-
   const [nodes, setNodes] = useState<any[]>([]);
   const [edges, setEdges] = useState<any[]>([]);
 
   useEffect(() => {
-
     async function loadGraph() {
-
       const response = await fetch(
         "http://127.0.0.1:8000/knowledge-graph"
       );
 
       const graph = await response.json();
 
-      const nodePositions = {
-        core: { x: 350, y: 50 },
-        planner: { x: 80, y: 180 },
-        researcher: { x: 250, y: 180 },
-        engineer: { x: 450, y: 180 },
-        security: { x: 650, y: 180 },
-        analyst: { x: 180, y: 350 },
-        reviewer: { x: 520, y: 350 },
-        memory: { x: 350, y: 520 },
+      const positions: any = {
+        Core: { x: 500, y: 50 },
+        Memory: { x: 500, y: 650 },
       };
 
-      const flowNodes = graph.nodes.map((node: any) => ({
-        id: node.id,
+      const agentOrder = [
+        "Planner",
+        "Researcher",
+        "Engineer",
+        "Security",
+        "Analyst",
+        "Reviewer",
+      ];
 
-        position:
-          nodePositions[node.id as keyof typeof nodePositions] ||
-          { x: 0, y: 0 },
+      const flowNodes = graph.nodes.map((node: any) => {
 
-        data: {
-          label: node.label,
-        },
+        let position =
+          positions[node.type];
 
-        style: {
-          background: "#6D28D9",
-          color: "white",
-          border: "1px solid #8B5CF6",
-          borderRadius: 12,
-          padding: 10,
-        },
-      }));
+        if (
+          node.type === "Agent"
+        ) {
+          const index = agentOrder.indexOf(
+            node.label
+          );
 
-      const flowEdges = graph.edges.map(
-        (edge: any, index: number) => ({
-          id: `edge-${index}`,
+          position = {
+            x: 120 + index * 180,
+            y: 220,
+          };
+        }
 
-          source: edge[0],
+        if (
+          node.type === "Project"
+        ) {
+          position = {
+            x: 500,
+            y: 450,
+          };
+        }
 
-          target: edge[1],
+        let background = "#6D28D9";
 
-          animated: true,
-        })
-      );
+        if (node.type === "Project")
+          background = "#2563EB";
+
+        if (node.type === "Memory")
+          background = "#059669";
+
+        if (node.type === "Core")
+          background = "#9333EA";
+
+        return {
+          id: node.id,
+
+          data: {
+            label: node.label,
+          },
+
+          position,
+
+          style: {
+            background,
+            color: "white",
+            borderRadius: 14,
+            border: "2px solid white",
+            padding: 12,
+            fontWeight: "bold",
+            minWidth: 120,
+            textAlign: "center",
+          },
+        };
+      });
+
+      const flowEdges =
+        graph.edges.map(
+          (
+            edge: any,
+            index: number
+          ) => ({
+            id: `edge-${index}`,
+
+            source: edge.source,
+
+            target: edge.target,
+
+            animated: true,
+
+            label: edge.label,
+
+            markerEnd: {
+              type: MarkerType.ArrowClosed,
+            },
+          })
+        );
 
       setNodes(flowNodes);
 
@@ -75,7 +126,6 @@ export default function KnowledgeGraphPage() {
     }
 
     loadGraph();
-
   }, []);
 
   return (
@@ -86,38 +136,31 @@ export default function KnowledgeGraphPage() {
       <section className="flex-1 p-10">
 
         <h1 className="text-4xl font-bold">
-          🔗 Knowledge Graph
+          🔗 Live Knowledge Graph
         </h1>
 
         <p className="mt-3 text-slate-400">
-          Live Cognitive Network of Synapse OS
+          Real-time cognitive network generated from Neo4j.
         </p>
 
         <div
-          className="mt-10 rounded-2xl overflow-hidden border border-white/10"
+          className="mt-8 rounded-2xl overflow-hidden border border-white/10"
           style={{
-            height: "700px",
+            height: "750px",
           }}
         >
-
           <ReactFlow
             nodes={nodes}
             edges={edges}
             fitView
           >
 
-            <Background />
-
-            <MiniMap />
-
             <Controls />
 
+            <Background />
           </ReactFlow>
-
         </div>
-
       </section>
-
     </main>
   );
 }

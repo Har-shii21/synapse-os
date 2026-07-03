@@ -6,6 +6,7 @@ load_dotenv()
 
 
 class Neo4jConnection:
+
     def __init__(self):
         self.driver = GraphDatabase.driver(
             os.getenv("NEO4J_URI"),
@@ -20,6 +21,7 @@ class Neo4jConnection:
         self.driver.close()
 
     def save_project(self, task):
+
         query = """
         CREATE (p:Project {
             task: $task
@@ -30,6 +32,7 @@ class Neo4jConnection:
             session.run(query, task=task)
 
     def get_projects(self):
+
         query = """
         MATCH (p:Project)
         RETURN p.task AS task
@@ -39,4 +42,26 @@ class Neo4jConnection:
 
         with self.driver.session() as session:
             result = session.run(query)
-            return [record["task"] for record in result]
+
+            return [
+                record["task"]
+                for record in result
+            ]
+
+    def search_similar_projects(self):
+
+        query = """
+        MATCH (p:Project)
+        RETURN p.task AS task
+        ORDER BY elementId(p) DESC
+        LIMIT 3
+        """
+
+        with self.driver.session() as session:
+
+            result = session.run(query)
+
+            return [
+                record["task"]
+                for record in result
+            ]

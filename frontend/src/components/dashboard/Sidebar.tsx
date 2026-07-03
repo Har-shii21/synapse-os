@@ -1,18 +1,24 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const menuItems = [
-  "Dashboard",
-  "Agents",
-  "Memory",
-  "Knowledge Graph",
-  "Replay",
-  "Analytics",
-  "Settings",
+  { name: "Dashboard", href: "/dashboard" },
+  { name: "Agents", href: "/agents" },
+  { name: "Memory", href: "/memory" },
+  { name: "Knowledge Graph", href: "/knowledge-graph" },
+  { name: "Replay", href: "/replay" },
+  { name: "Analytics", href: "/analytics" },
+  { name: "Settings", href: "/settings" },
 ];
 
 export default function Sidebar() {
+  const pathname = usePathname();
+
   return (
     <aside className="w-72 min-h-screen bg-[#0B1120] border-r border-white/10 p-6">
+
       <Link href="/" className="text-3xl font-bold text-white">
         🧠 Synapse
       </Link>
@@ -23,12 +29,17 @@ export default function Sidebar() {
 
       <nav className="mt-12 space-y-3">
         {menuItems.map((item) => (
-          <button
-            key={item}
-            className="w-full rounded-xl px-4 py-3 text-left text-slate-300 transition hover:bg-violet-600/20 hover:text-white"
+          <Link
+            key={item.name}
+            href={item.href}
+            className={`block rounded-xl px-4 py-3 transition ${
+              pathname === item.href
+                ? "bg-violet-600 text-white"
+                : "text-slate-300 hover:bg-violet-600/20 hover:text-white"
+            }`}
           >
-            {item}
-          </button>
+            {item.name}
+          </Link>
         ))}
       </nav>
 
@@ -40,6 +51,7 @@ export default function Sidebar() {
           <span className="text-white">All Agents Online</span>
         </div>
       </div>
+
     </aside>
   );
 }

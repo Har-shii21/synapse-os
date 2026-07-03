@@ -1,15 +1,25 @@
+import Link from "next/link";
+
 const agents = [
   {
-    name: "Planner Agent",
+    name: "🧠 Planner Agent",
     desc: "Breaks complex goals into intelligent workflows",
   },
   {
-    name: "Research Agent",
+    name: "🔍 Researcher Agent",
     desc: "Collects knowledge and analyzes information",
   },
   {
-    name: "Engineer Agent",
-    desc: "Creates solutions and implementation plans",
+    name: "⚙️ Engineer Agent",
+    desc: "Builds solutions and executes implementation plans",
+  },
+  {
+    name: "🛡️ Security Agent",
+    desc: "Reviews security, privacy, and compliance risks",
+  },
+  {
+    name: "📊 Analyst Agent",
+    desc: "Generates insights, metrics, and recommendations",
   },
 ];
 
@@ -40,19 +50,20 @@ export default function Architecture() {
           <div className="mt-12 grid gap-6 md:grid-cols-3">
 
             {agents.map((agent) => (
-              <div
-                key={agent.name}
-                className="rounded-2xl border border-white/10 bg-black/20 p-6"
-              >
-                <h3 className="text-xl font-semibold text-white">
-                  {agent.name}
-                </h3>
+  <Link
+    key={agent.name}
+    href="/agents"
+    className="rounded-2xl border border-white/10 bg-black/20 p-6 transition hover:border-violet-500 hover:scale-105 hover:bg-violet-500/10"
+  >
+    <h3 className="text-xl font-semibold text-white">
+      {agent.name}
+    </h3>
 
-                <p className="mt-3 text-sm text-slate-400">
-                  {agent.desc}
-                </p>
-              </div>
-            ))}
+    <p className="mt-3 text-sm text-slate-400">
+      {agent.desc}
+    </p>
+  </Link>
+))}
 
           </div>
 

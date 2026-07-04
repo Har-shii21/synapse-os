@@ -2,12 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from agents.planner import PlannerAgent
-from agents.executor import ExecutorAgent
-from agents.reviewer import ReviewerAgent
-
 from memory.state import get_state
 from database.graph import Neo4jConnection
+from orchestration.coordinator import Coordinator
 
 app = FastAPI()
 
@@ -19,18 +16,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-planner = PlannerAgent()
-executor = ExecutorAgent()
-reviewer = ReviewerAgent()
+coordinator = Coordinator()
 
 
 class TaskRequest(BaseModel):
     task: str
 
-
-# -----------------------------
-# Replay Memory
-# -----------------------------
 
 workflow_history = []
 
@@ -58,26 +49,16 @@ def home():
 @app.post("/run-agent")
 def run_agent(request: TaskRequest):
 
-    plan = planner.run(request.task)
-
-    tasks = plan.split("\n")
-
-    execution = executor.run(tasks)
-
-    review = reviewer.run(execution)
+    result = coordinator.execute(request.task)
 
     save_workflow(
         request.task,
-        plan,
-        execution,
-        review,
+        result["plan"],
+        result["code"],
+        result["review"],
     )
 
-    return {
-        "plan": plan,
-        "execution": execution,
-        "review": review,
-    }
+    return result
 
 
 @app.get("/workflow-status")

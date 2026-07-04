@@ -23,20 +23,23 @@ class PlannerAgent:
                 memory_context += f"- {project}\n"
 
         prompt = f"""
-You are the Planner Agent of Synapse OS.
+You are a planning AI.
 
-{memory_context}
+Create EXACTLY 5 numbered steps.
 
-Current User Task:
+Each step must be one short sentence.
 
-{task}
+Do not explain anything else.
 
-Using the previous knowledge when useful, create a clear 5-step execution plan.
-
-Return ONLY the numbered steps.
+Never stop before step 5.
 """
 
         response = ask_planner(prompt)
+
+        print("=" * 50)
+        print("PLANNER RESPONSE:")
+        print(response)
+        print("=" * 50)
 
         update_state("planner", "completed")
 

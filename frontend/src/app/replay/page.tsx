@@ -11,7 +11,7 @@ export default function ReplayPage() {
       try {
         const res = await fetch("http://127.0.0.1:8000/replay");
         const data = await res.json();
-        setHistory(data.history);
+        setHistory(data.history || []);
       } catch (err) {
         console.error(err);
       }
@@ -55,36 +55,29 @@ export default function ReplayPage() {
                 key={index}
                 className="rounded-2xl border border-white/10 bg-[#0B1120] p-6"
               >
-                {/* TASK */}
-                <h2 className="text-xl font-bold">
-                  {item.task}
-                </h2>
+                <h2 className="text-xl font-bold">{item.task}</h2>
 
-                {/* PLAN */}
-                <div className="mt-4 text-slate-400">
-                  <p className="font-semibold text-white">Plan</p>
-                  <pre className="whitespace-pre-wrap text-sm">
+                <div className="mt-4">
+                  <p className="font-semibold text-white">🧠 Plan</p>
+                  <pre className="mt-2 whitespace-pre-wrap text-sm text-slate-300">
                     {item.plan}
                   </pre>
                 </div>
 
-                {/* EXECUTION */}
-                <div className="mt-4 text-slate-400">
-                  <p className="font-semibold text-white">Execution</p>
-                  <pre className="whitespace-pre-wrap text-sm">
-                    {item.execution?.join("\n")}
+                <div className="mt-4">
+                  <p className="font-semibold text-white">⚙️ Engineer Output</p>
+                  <pre className="mt-2 whitespace-pre-wrap text-sm text-slate-300">
+                    {item.code}
                   </pre>
                 </div>
 
-                {/* REVIEW */}
-                <div className="mt-4 text-slate-400">
-                  <p className="font-semibold text-white">Review</p>
-                  <pre className="whitespace-pre-wrap text-sm">
-                    {JSON.stringify(item.review, null, 2)}
+                <div className="mt-4">
+                  <p className="font-semibold text-white">✅ Review</p>
+                  <pre className="mt-2 whitespace-pre-wrap text-sm text-slate-300">
+                    {item.review}
                   </pre>
                 </div>
 
-                {/* REPLAY BUTTON */}
                 <button
                   onClick={() => replayWorkflow(item)}
                   className="mt-6 rounded-xl bg-violet-600 px-5 py-2 hover:bg-violet-500"

@@ -5,33 +5,39 @@ import Sidebar from "../../components/dashboard/Sidebar";
 
 export default function Dashboard() {
   const [task, setTask] = useState("");
-  const [result, setResult] = useState("");
-  const [review, setReview] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+
+  const [plan, setPlan] = useState("");
+  const [research, setResearch] = useState("");
+  const [code, setCode] = useState("");
+  const [review, setReview] = useState("");
 
   const [projects, setProjects] = useState<string[]>([]);
   const [workflow, setWorkflow] = useState<any>({});
 
   useEffect(() => {
     loadProjects();
+    loadWorkflow();
 
-    const interval = setInterval(() => {
-      loadWorkflow();
-    }, 1000);
+    const interval = setInterval(loadWorkflow, 1000);
 
     return () => clearInterval(interval);
   }, []);
 
   async function loadProjects() {
-    const response = await fetch("http://127.0.0.1:8000/projects");
-    const data = await response.json();
-    setProjects(data.projects);
+    try {
+      const res = await fetch("http://127.0.0.1:8000/projects");
+      const data = await res.json();
+      setProjects(data.projects || []);
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   async function loadWorkflow() {
     try {
-      const response = await fetch("http://127.0.0.1:8000/workflow-status");
-      const data = await response.json();
+      const res = await fetch("http://127.0.0.1:8000/workflow-status");
+      const data = await res.json();
       setWorkflow(data);
     } catch (err) {
       console.log(err);
@@ -39,25 +45,31 @@ export default function Dashboard() {
   }
 
   async function runAgent() {
+    if (!task) return;
+
     setLoading(true);
 
-    const response = await fetch("http://127.0.0.1:8000/run-agent", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ task }),
-    });
+    try {
+      const response = await fetch("http://127.0.0.1:8000/run-agent", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ task }),
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    setResult(
-      `PLAN:\n${data.plan}\n\nEXECUTION:\n${data.execution.join("\n")}`
-    );
+      setPlan(data.plan || "");
+      setResearch(data.research || "");
+      setCode(data.code || "");
+      setReview(data.review || "");
 
-    setReview(data.review);
-
-    loadProjects();
+      loadProjects();
+      loadWorkflow();
+    } catch (err) {
+      console.log(err);
+    }
 
     setLoading(false);
   }
@@ -67,6 +79,7 @@ export default function Dashboard() {
       <Sidebar />
 
       <section className="flex-1 p-10">
+
         <h1 className="text-4xl font-bold">
           Welcome to Synapse OS
         </h1>
@@ -75,7 +88,7 @@ export default function Dashboard() {
           Your AI team is ready.
         </p>
 
-        {/* Live Workflow */}
+        {/* Workflow */}
 
         <div className="mt-8 rounded-xl bg-[#0B1120] p-6 border border-white/10">
           <h2 className="text-2xl font-bold">
@@ -96,9 +109,9 @@ export default function Dashboard() {
             </span>
           </p>
 
-          <div className="mt-4 h-3 w-full rounded-full bg-slate-700">
+          <div className="mt-4 h-3 rounded-full bg-slate-700">
             <div
-              className="h-3 rounded-full bg-violet-500 transition-all duration-500"
+              className="h-3 rounded-full bg-violet-600 transition-all duration-500"
               style={{
                 width: `${workflow.progress || 0}%`,
               }}
@@ -109,8 +122,10 @@ export default function Dashboard() {
         {/* Task */}
 
         <div className="mt-10">
+
           <textarea
             className="w-full rounded-xl bg-[#0B1120] border border-white/10 p-4"
+            rows={5}
             placeholder="Give your AI team a task..."
             value={task}
             onChange={(e) => setTask(e.target.value)}
@@ -118,35 +133,66 @@ export default function Dashboard() {
 
           <button
             onClick={runAgent}
-            className="mt-4 rounded-xl bg-violet-600 px-6 py-3 font-semibold"
+            className="mt-4 rounded-xl bg-violet-600 px-6 py-3 font-semibold hover:bg-violet-700"
           >
             {loading ? "Thinking..." : "Run Agent"}
           </button>
+
         </div>
 
-        {/* Result */}
+        {/* Planner */}
 
-        {result && (
-          <div className="mt-10 rounded-xl bg-[#0B1120] p-6">
-            <h2 className="text-xl font-bold">
-              Agent Plan
+        {plan && (
+          <div className="mt-8 rounded-xl bg-[#0B1120] p-6">
+            <h2 className="text-2xl font-bold">
+              🧠 Planner
             </h2>
 
             <pre className="mt-4 whitespace-pre-wrap text-slate-300">
-              {result}
+              {plan}
             </pre>
+          </div>
+        )}
 
-            {review && (
-              <div className="mt-6 rounded-xl border border-white/10 p-5">
-                <h2 className="text-xl font-bold mb-4">
-                  Synapse Workflow
-                </h2>
+        {/* Research */}
 
-                <pre className="whitespace-pre-wrap text-slate-300">
-                  {review}
-                </pre>
-              </div>
-            )}
+        {research && (
+          <div className="mt-8 rounded-xl bg-[#0B1120] p-6">
+            <h2 className="text-2xl font-bold">
+              🔍 Research
+            </h2>
+
+            <pre className="mt-4 whitespace-pre-wrap text-slate-300">
+              {research}
+            </pre>
+          </div>
+        )}
+
+        {/* Engineer */}
+
+        {code && (
+          <div className="mt-8 rounded-xl bg-[#0B1120] p-6">
+            <h2 className="text-2xl font-bold">
+              ⚙️ Engineer
+            </h2>
+
+            <pre className="mt-4 whitespace-pre-wrap text-slate-300">
+              {code}
+            </pre>
+          </div>
+        )}
+
+        {/* Reviewer */}
+
+        {review && (
+          <div className="mt-8 rounded-xl bg-[#0B1120] p-6">
+            <h2 className="text-2xl font-bold">
+              ✅ Reviewer
+            </h2>
+
+            <pre className="mt-4 whitespace-pre-wrap text-slate-300">
+              {review}
+            </pre>
           </div>
         )}
 
@@ -158,6 +204,7 @@ export default function Dashboard() {
           </h2>
 
           <div className="mt-4">
+
             {projects.length === 0 ? (
               <p className="text-slate-400">
                 No previous projects
@@ -166,14 +213,16 @@ export default function Dashboard() {
               projects.map((project, index) => (
                 <p
                   key={index}
-                  className="py-1 text-slate-300"
+                  className="text-slate-300 py-1"
                 >
                   • {project}
                 </p>
               ))
             )}
+
           </div>
         </div>
+
       </section>
     </main>
   );

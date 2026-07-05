@@ -76,21 +76,27 @@ export default function TeamRoom() {
   const data = await res.json();
 
   const structuredResponse = [
-    {
-      sender: "🧠 Planner (Nova)",
-      text: data.execution,
-      delay: 800,
-    },
-    {
-      sender: "⚙️ Executor (Atlas)",
-      text: data.execution,
-    },
-    {
-      sender: "📊 Reviewer (Pulse)",
-      text: data.review,
-      delay: 1600,
-    },
-  ];
+  {
+    sender: "🧠 Planner (Nova)",
+    text: data.plan,
+    delay: 800,
+  },
+  {
+    sender: "🔍 Researcher (Echo)",
+    text: data.research,
+    delay: 1200,
+  },
+  {
+    sender: "⚙️ Engineer (Atlas)",
+    text: data.code,
+    delay: 1600,
+  },
+  {
+    sender: "✅ Reviewer (Pulse)",
+    text: data.review,
+    delay: 2000,
+  },
+];
 
   structuredResponse.forEach((msg) => {
     setTimeout(() => {

@@ -35,7 +35,7 @@ class Neo4jConnection:
         MERGE (reviewer:Agent {name:"Reviewer"})
         MERGE (memory:Memory {name:"Cognitive Memory"})
 
-        CREATE (project:Project {
+        MERGE (project:Project {
             name:$task
         })
 
@@ -74,7 +74,6 @@ class Neo4jConnection:
 
         with self.driver.session() as session:
             result = session.run(query)
-
             return [record["task"] for record in result]
 
     # -------------------------
@@ -87,13 +86,14 @@ class Neo4jConnection:
         MATCH (p:Project)
         RETURN p.name AS task
         ORDER BY elementId(p) DESC
-        LIMIT 3
+        LIMIT 5
         """
 
         with self.driver.session() as session:
             result = session.run(query)
-
-            return [record["task"] for record in result]
+            projects = [record["task"] for record in result]
+            print("Projects:", projects)
+            return projects
 
     # -------------------------
     # Dynamic Knowledge Graph

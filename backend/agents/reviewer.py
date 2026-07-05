@@ -4,29 +4,40 @@ from memory.state import update_state
 
 class ReviewerAgent:
 
-    def run(self, execution_results):
+    def __init__(self):
+        self.name = "Reviewer Agent"
+
+    def run(self, code):
 
         prompt = f"""
-Review this execution:
+You are the Reviewer Agent of Synapse OS.
 
-{execution_results}
+Review the following implementation.
 
-Return ONLY this format:
+Engineer Output:
 
-Overall Score: X/10
+{code}
 
-Strengths:
-- ...
+Evaluate:
 
-Improvements:
-- ...
+- Completeness
+- Correctness
+- Security
+- Scalability
+- Missing Features
 
-Final Verdict:
-Approved / Needs Improvement
+Provide:
+
+- Strengths
+- Weaknesses
+- Improvements
+- Final Verdict
+
+Return only the review.
 """
 
-        review = ask_reviewer(prompt)
+        response = ask_reviewer(prompt)
 
         update_state("reviewer", "completed")
 
-        return review
+        return response

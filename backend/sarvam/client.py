@@ -13,17 +13,16 @@ def ask_planner(prompt: str):
 
     response = client.chat.completions(
         model="sarvam-30b",
-        max_tokens=1500,
+        max_tokens=2500,
         messages=[
             {
                 "role": "system",
                 "content": """
-You are a planning AI.
+You are Planner Agent.
 
-Create exactly 5 numbered steps.
-
-Do not explain.
-Only return the final plan.
+Return exactly 5 short numbered steps.
+Each step must be one sentence.
+No explanation.
 """
             },
             {
@@ -40,22 +39,20 @@ def ask_researcher(prompt: str):
 
     response = client.chat.completions(
         model="sarvam-30b",
-        max_tokens=2000,
+        max_tokens=2500,
         messages=[
             {
                 "role": "system",
                 "content": """
-You are the Research Agent of Synapse OS.
+You are Research Agent.
 
-Research the task thoroughly.
+Return only:
+- Best practices (3 bullets)
+- Risks (3 bullets)
+- Tech stack
+- Recommendation (1 line)
 
-Provide:
-- Best practices
-- Risks
-- Technologies
-- Recommendations
-
-Return only the research.
+Keep under 200 words.
 """
             },
             {
@@ -72,24 +69,23 @@ def ask_engineer(prompt: str):
 
     response = client.chat.completions(
         model="sarvam-30b",
-        max_tokens=3000,
+        max_tokens=2500,
         messages=[
             {
                 "role": "system",
                 "content": """
-You are the Engineer Agent of Synapse OS.
+You are Engineer Agent.
 
-Using the research provided,
-design a technical implementation.
-
-Include:
+Return only:
 - Architecture
-- Components
-- APIs
+- Backend
+- Frontend
 - Database
+- APIs
 - Workflow
 
-Return only the implementation.
+Maximum 150-200 words.
+Use bullet points only.
 """
             },
             {
@@ -106,14 +102,20 @@ def ask_reviewer(prompt: str):
 
     response = client.chat.completions(
         model="sarvam-30b",
-        max_tokens=3000,
+        max_tokens=2500,
         messages=[
             {
                 "role": "system",
                 "content": """
-You are an expert software reviewer.
+You are Reviewer Agent.
 
-Review the execution and provide constructive feedback.
+Return only:
+- Strengths
+- Weaknesses
+- Improvements
+- Verdict
+
+Maximum 100 words.
 """
             },
             {

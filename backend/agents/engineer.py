@@ -12,9 +12,14 @@ class EngineerAgent:
         prompt = f"""
 You are the Engineer Agent of Synapse OS.
 
-Using the research below, design a technical implementation.
+Research Output:
+
+{research}
+
+Design the implementation.
 
 Include:
+
 - System Architecture
 - Backend
 - Frontend
@@ -22,13 +27,16 @@ Include:
 - APIs
 - Workflow
 
-Research:
-
-{research}
+Return only the implementation.
 """
 
         response = ask_engineer(prompt)
-
+        
+        print("=" * 50)
+        print("ENGINEER RESPONSE:")
+        print(response)
+        print("=" * 50)
+        
         update_state("engineer", "completed")
 
         return response

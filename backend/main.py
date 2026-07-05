@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from memory.state import get_state
 from database.graph import Neo4jConnection
 from orchestration.coordinator import Coordinator
+from memory.agent_status import get_status
 
 app = FastAPI()
 
@@ -49,6 +50,10 @@ def home():
 @app.post("/run-agent")
 def run_agent(request: TaskRequest):
 
+    print("=" * 50)
+    print("RUN AGENT CALLED:", request.task)
+    print("=" * 50)
+
     result = coordinator.execute(request.task)
 
     save_workflow(
@@ -58,6 +63,13 @@ def run_agent(request: TaskRequest):
         result["review"],
     )
 
+    db = Neo4jConnection()
+
+    print("Saving project to Neo4j...")
+
+    db.save_project(request.task)
+    db.close()
+
     return result
 
 
@@ -65,19 +77,23 @@ def run_agent(request: TaskRequest):
 def workflow_status():
     return get_state()
 
+@app.get("/agent-status")
+def agent_status():
+    return get_status()
 
 @app.get("/projects")
 def get_projects():
-
     db = Neo4jConnection()
 
-    projects = db.get_projects()
-
-    db.close()
-
-    return {
-        "projects": projects
-    }
+    try:
+        projects = db.get_projects()
+        return {"projects": projects}
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return {"error": str(e)}
+    finally:
+        db.close()
 
 
 # -----------------------------

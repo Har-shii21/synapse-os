@@ -12,16 +12,21 @@ class ResearchAgent:
         prompt = f"""
 You are the Research Agent of Synapse OS.
 
-Analyze the following execution plan and provide:
+The Planner has already created the following execution plan.
+
+Planner Output:
+{plan}
+
+Your job is to help the Engineer.
+
+Research and provide:
 
 - Best practices
-- Relevant technologies
-- Possible risks
+- Technologies
+- Risks
 - Recommendations
 
-Execution Plan:
-
-{plan}
+Return only the research.
 """
 
         response = ask_researcher(prompt)

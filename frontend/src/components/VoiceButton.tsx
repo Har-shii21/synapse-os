@@ -1,75 +1,252 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
 import { speechToText } from "../lib/api";
 
 interface Props {
-  onTranscript: (text: string) => void;
+
+  language: string;
+
+  disabled?: boolean;
+
+  onTranscript: (
+    text: string
+  ) => void;
+
 }
 
-export default function VoiceButton({ onTranscript }: Props) {
-  const [recording, setRecording] = useState(false);
+export default function VoiceButton({
 
-  const mediaRecorder = useRef<MediaRecorder | null>(null);
-  const chunks = useRef<Blob[]>([]);
+  language,
+
+  disabled,
+
+  onTranscript,
+
+}: Props) {
+
+  const [recording, setRecording] =
+    useState(false);
+
+  const [processing, setProcessing] =
+    useState(false);
+
+  const [seconds, setSeconds] =
+    useState(0);
+
+  const mediaRecorder =
+    useRef<MediaRecorder | null>(null);
+
+  const mediaStream =
+    useRef<MediaStream | null>(null);
+
+  const chunks =
+    useRef<Blob[]>([]);
+
+  const timer =
+    useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+
+    if (recording) {
+
+      timer.current = setInterval(() => {
+
+        setSeconds((prev) => prev + 1);
+
+      }, 1000);
+
+    } else {
+
+      if (timer.current) {
+
+        clearInterval(timer.current);
+
+      }
+
+      setSeconds(0);
+
+    }
+
+    return () => {
+
+      if (timer.current) {
+
+        clearInterval(timer.current);
+
+      }
+
+    };
+
+  }, [recording]);
 
   async function startRecording() {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-    });
 
-    const recorder = new MediaRecorder(stream);
+    if (
+      disabled ||
+      processing ||
+      recording
+    )
+      return;
 
-    mediaRecorder.current = recorder;
-    chunks.current = [];
+    try {
 
-    recorder.ondataavailable = (event) => {
-      chunks.current.push(event.data);
-    };
+      const stream =
+        await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
 
-    recorder.onstop = async () => {
-      const blob = new Blob(chunks.current, {
-        type: "audio/webm",
-      });
+      mediaStream.current =
+        stream;
 
-      const file = new File([blob], "voice.webm", {
-        type: "audio/webm",
-      });
+      const recorder =
+        new MediaRecorder(stream);
 
-      try {
-        const result = await speechToText(file);
+      mediaRecorder.current =
+        recorder;
 
-        console.log(result);
+      chunks.current = [];
+      recorder.ondataavailable = (
+        event
+      ) => {
 
-        const text =
-          result.text ||
-          result.transcript ||
-          "";
+        if (event.data.size > 0) {
 
-        if (text) {
-          onTranscript(text);
+          chunks.current.push(
+            event.data
+          );
+
         }
 
-      } catch (err) {
-        console.error(err);
-      }
-    };
+      };
 
-    recorder.start();
-    setRecording(true);
+      recorder.onstop =
+        async () => {
+
+          setProcessing(true);
+
+          try {
+
+            const blob =
+              new Blob(
+                chunks.current,
+                {
+                  type: "audio/webm",
+                }
+              );
+
+            const file =
+              new File(
+                [blob],
+                "voice.webm",
+                {
+                  type: "audio/webm",
+                }
+              );
+
+            const result =
+              await speechToText(
+                file,
+                language
+              );
+
+            const text =
+              result.text ||
+              result.transcript ||
+              "";
+
+            if (
+              text.trim()
+            ) {
+
+              onTranscript(
+                text
+              );
+
+            }
+
+          } catch (err) {
+
+            console.error(err);
+
+            alert(
+              "Unable to convert speech."
+            );
+
+          } finally {
+
+            mediaStream.current
+              ?.getTracks()
+              .forEach(
+                (track) =>
+                  track.stop()
+              );
+
+            mediaStream.current =
+              null;
+
+            setProcessing(
+              false
+            );
+
+          }
+
+        };
+
+      recorder.start();
+
+      setRecording(
+        true
+      );
+
+    } catch (err) {
+
+      console.error(err);
+
+      alert(
+        "Microphone permission denied."
+      );
+
+    }
+
   }
 
   function stopRecording() {
+
     mediaRecorder.current?.stop();
-    setRecording(false);
+
+    setRecording(
+      false
+    );
+
   }
 
   return (
+
     <button
-      onClick={recording ? stopRecording : startRecording}
-      className="rounded-xl bg-slate-700 px-5 py-3 hover:bg-slate-600"
+      disabled={
+        disabled ||
+        processing
+      }
+      onClick={
+        recording
+          ? stopRecording
+          : startRecording
+      }
+      className="rounded-xl bg-slate-700 px-5 py-3 transition hover:bg-slate-600 disabled:cursor-not-allowed disabled:opacity-60"
     >
-      {recording ? "⏹ Stop Recording" : "🎤 Voice"}
+
+      {processing ? (
+        "⏳ Processing..."
+      ) : recording ? (
+        `⏹ Stop (${seconds}s)`
+      ) : (
+        "🎤 Voice"
+      )}
+
     </button>
+
   );
+
 }

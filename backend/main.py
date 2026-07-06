@@ -1,5 +1,14 @@
-from fastapi import FastAPI, UploadFile, File, Form
+import os
+
+from fastapi import (
+    FastAPI,
+    UploadFile,
+    File,
+    Form,
+    HTTPException,
+)
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from memory.state import get_state
@@ -8,11 +17,16 @@ from orchestration.coordinator import Coordinator
 from memory.agent_status import get_status
 from agents.voice import voice_agent
 
-app = FastAPI()
+app = FastAPI(
+    title="Synapse OS API",
+    version="1.0.0",
+)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[
+        "http://localhost:3000",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -30,10 +44,20 @@ class VoiceRequest(BaseModel):
     language: str = "en-IN"
 
 
+class TranslateRequest(BaseModel):
+    text: str
+    target_language: str
+
+
 workflow_history = []
 
 
-def save_workflow(task, plan, execution, review):
+def save_workflow(
+    task,
+    plan,
+    execution,
+    review,
+):
     workflow_history.append(
         {
             "task": task,
@@ -44,148 +68,305 @@ def save_workflow(task, plan, execution, review):
     )
 
 
-# -----------------------------
-# Routes
-# -----------------------------
-
 @app.get("/")
 def home():
-    return {"status": "Synapse Backend Running 🚀"}
+
+    return {
+        "status": "Synapse Backend Running 🚀",
+        "version": "1.0.0",
+    }
+
+
+@app.get("/health")
+def health():
+
+    return {
+        "success": True,
+        "backend": "running",
+        "voice": "ready",
+        "coordinator": "ready",
+    }
+
+
+@app.get("/languages")
+def languages():
+
+    return {
+        "languages": [
+            "en-IN",
+            "hi-IN",
+            "te-IN",
+            "ta-IN",
+            "kn-IN",
+            "ml-IN",
+            "mr-IN",
+            "gu-IN",
+            "bn-IN",
+            "pa-IN",
+        ]
+    }
 
 
 @app.post("/run-agent")
 def run_agent(request: TaskRequest):
 
-    print("=" * 50)
-    print("RUN AGENT CALLED:", request.task)
-    print("=" * 50)
+    try:
 
-    result = coordinator.execute(request.task)
+        print("=" * 60)
+        print("RUN AGENT:", request.task)
+        print("=" * 60)
 
-    save_workflow(
-        request.task,
-        result["plan"],
-        result["code"],
-        result["review"],
-    )
+        result = coordinator.execute(
+            request.task
+        )
 
-    db = Neo4jConnection()
+        save_workflow(
+            request.task,
+            result["plan"],
+            result["code"],
+            result["review"],
+        )
 
-    print("Saving project to Neo4j...")
+        db = Neo4jConnection()
 
-    db.save_project(request.task)
-    db.close()
+        try:
 
-    return result
+            db.save_project(request.task)
 
+        finally:
 
-@app.get("/workflow-status")
-def workflow_status():
-    return get_state()
+            db.close()
+
+        return {
+            "success": True,
+            **result,
+        }
+
+    except Exception as e:
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(e),
+        )
+    
+    @app.get("/workflow-status")
+    def workflow_status():
+
+        return get_state()
 
 
 @app.get("/agent-status")
 def agent_status():
+
     return get_status()
 
 
 @app.get("/projects")
 def get_projects():
+
     db = Neo4jConnection()
 
     try:
+
         projects = db.get_projects()
-        return {"projects": projects}
+
+        return {
+            "success": True,
+            "projects": projects,
+        }
+
     except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return {"error": str(e)}
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(e),
+        )
+
     finally:
+
         db.close()
 
 
-# -----------------------------
-# LIVE KNOWLEDGE GRAPH
-# -----------------------------
+# ======================================================
+# KNOWLEDGE GRAPH
+# ======================================================
 
 @app.get("/knowledge-graph")
 def knowledge_graph():
 
     db = Neo4jConnection()
 
-    graph = db.get_graph_data()
+    try:
 
-    db.close()
+        graph = db.get_graph_data()
 
-    return graph
+        return {
+            "success": True,
+            **graph,
+        }
+
+    finally:
+
+        db.close()
 
 
-# -----------------------------
-# REPLAY
-# -----------------------------
+# ======================================================
+# REPLAY HISTORY
+# ======================================================
 
 @app.get("/replay")
-def get_replay():
+def replay():
 
     return {
-        "history": workflow_history[::-1]
+        "success": True,
+        "history": workflow_history[::-1],
     }
 
 
-# -----------------------------
+# ======================================================
 # ANALYTICS
-# -----------------------------
+# ======================================================
 
 @app.get("/analytics")
 def analytics():
 
     db = Neo4jConnection()
 
-    projects = db.get_projects()
+    try:
 
-    graph = db.get_graph_data()
+        projects = db.get_projects()
 
-    db.close()
+        graph = db.get_graph_data()
 
-    return {
-        "projects_completed": len(projects),
-        "ai_agents": 7,
-        "memory_nodes": len(graph["nodes"]),
-        "knowledge_links": len(graph["edges"]),
-        "workflow_success": "98%",
-        "reviews_approved": len(workflow_history),
-    }
+        return {
+
+            "success": True,
+
+            "projects_completed": len(projects),
+
+            "ai_agents": 7,
+
+            "memory_nodes": len(graph["nodes"]),
+
+            "knowledge_links": len(graph["edges"]),
+
+            "workflow_success": "98%",
+
+            "reviews_approved": len(workflow_history),
+
+        }
+
+    finally:
+
+        db.close()
 
 
 # ======================================================
-#               VOICE APIs (Sarvam AI)
+# SPEECH → TEXT
 # ======================================================
 
 @app.post("/speech-to-text")
 async def speech_to_text(
     file: UploadFile = File(...),
-    language: str = Form("en-IN")
+    language: str = Form("en-IN"),
 ):
 
     temp_file = f"temp_{file.filename}"
 
-    with open(temp_file, "wb") as f:
-        f.write(await file.read())
+    try:
 
-    result = voice_agent.listen(
-        temp_file,
-        language
-    )
+        with open(temp_file, "wb") as f:
 
-    return result
+            f.write(await file.read())
 
+        result = voice_agent.listen(
+            temp_file,
+            language,
+        )
+
+        return result
+
+    except Exception as e:
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(e),
+        )
+
+    finally:
+
+        if os.path.exists(temp_file):
+
+            os.remove(temp_file)
+
+
+# ======================================================
+# TEXT → SPEECH
+# ======================================================
 
 @app.post("/text-to-speech")
 def text_to_speech(request: VoiceRequest):
 
-    result = voice_agent.speak(
-        request.text,
-        request.language
-    )
+    try:
 
-    return result
+        result = voice_agent.speak(
+            request.text,
+            request.language,
+        )
+
+        return result
+
+    except Exception as e:
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(e),
+        )
+
+
+# ======================================================
+# TRANSLATE
+# ======================================================
+
+@app.post("/translate")
+def translate(request: TranslateRequest):
+
+    try:
+
+        translated = voice_agent.translate(
+            request.text,
+            request.target_language,
+        )
+
+        return {
+            "success": True,
+            "translated_text": translated,
+        }
+
+    except Exception as e:
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(e),
+        )
+
+
+# ======================================================
+# AUDIO FILE
+# ======================================================
+
+@app.get("/audio/{filename}")
+def get_audio(filename: str):
+
+    if not os.path.exists(filename):
+
+        raise HTTPException(
+            status_code=404,
+            detail="Audio file not found",
+        )
+
+    return FileResponse(
+        filename,
+        media_type="audio/mpeg",
+        filename=filename,
+    )

@@ -1,78 +1,164 @@
-const API = "http://127.0.0.1:8000";
+const API_URL =
+  "http://127.0.0.1:8000";
 
-export async function runAgent(task: string) {
-  const res = await fetch(`${API}/run-agent`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ task }),
-  });
+async function request(
+  endpoint: string,
+  options?: RequestInit
+) {
 
-  return await res.json();
+  const response = await fetch(
+    `${API_URL}${endpoint}`,
+    options
+  );
+
+  if (!response.ok) {
+
+    let message = "Request failed";
+
+    try {
+
+      const error =
+        await response.json();
+
+      message =
+        error.detail ||
+        error.error ||
+        message;
+
+    } catch {}
+
+    throw new Error(message);
+
+  }
+
+  return response.json();
+
+}
+
+export async function runAgent(
+  task: string
+) {
+
+  return request(
+    "/run-agent",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type":
+          "application/json",
+      },
+      body: JSON.stringify({
+        task,
+      }),
+    }
+  );
+
+}
+
+export async function getProjects() {
+
+  return request(
+    "/projects"
+  );
+
+}
+
+export async function getWorkflowStatus() {
+
+  return request(
+    "/workflow-status"
+  );
+
+}
+
+export async function getAgentStatus() {
+
+  return request(
+    "/agent-status"
+  );
+
+}
+
+export async function getKnowledgeGraph() {
+
+  return request(
+    "/knowledge-graph"
+  );
+
+}
+export async function getAnalytics() {
+
+  return request(
+    "/analytics"
+  );
+
+}
+
+export async function getReplay() {
+
+  return request(
+    "/replay"
+  );
+
 }
 
 export async function speechToText(
   file: File,
-  language: string = "en-IN"
+  language = "en-IN"
 ) {
-  const formData = new FormData();
 
-  formData.append("file", file);
-  formData.append("language", language);
+  const formData =
+    new FormData();
 
-  const res = await fetch(`${API}/speech-to-text`, {
-    method: "POST",
-    body: formData,
-  });
+  formData.append(
+    "file",
+    file
+  );
 
-  return await res.json();
+  formData.append(
+    "language",
+    language
+  );
+
+  const response =
+    await fetch(
+      `${API_URL}/speech-to-text`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+  if (!response.ok) {
+
+    throw new Error(
+      "Speech recognition failed."
+    );
+
+  }
+
+  return response.json();
+
 }
 
 export async function textToSpeech(
   text: string,
-  language: string = "en-IN"
+  language = "en-IN"
 ) {
-  const res = await fetch(`${API}/text-to-speech`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      text,
-      language,
-    }),
-  });
 
-  return await res.json();
-}
+  return request(
+    "/text-to-speech",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type":
+          "application/json",
+      },
+      body: JSON.stringify({
+        text,
+        language,
+      }),
+    }
+  );
 
-export async function getAnalytics() {
-  const res = await fetch(`${API}/analytics`);
-  return await res.json();
-}
-
-export async function getKnowledgeGraph() {
-  const res = await fetch(`${API}/knowledge-graph`);
-  return await res.json();
-}
-
-export async function getReplay() {
-  const res = await fetch(`${API}/replay`);
-  return await res.json();
-}
-
-export async function getProjects() {
-  const res = await fetch(`${API}/projects`);
-  return await res.json();
-}
-
-export async function getWorkflowStatus() {
-  const res = await fetch(`${API}/workflow-status`);
-  return await res.json();
-}
-
-export async function getAgentStatus() {
-  const res = await fetch(`${API}/agent-status`);
-  return await res.json();
 }

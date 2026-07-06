@@ -112,19 +112,12 @@ RESEARCH:
 
         start = time.time()
 
-        reviewer_input = f"""
-TASK:
-{self.memory.read('task')}
-
-PLAN:
-{self.memory.read('plan')}
-
-RESEARCH:
-{self.memory.read('research')}
-
-IMPLEMENTATION:
-{self.memory.read('code')}
-"""
+        reviewer_input = {
+    "task": self.memory.read("task"),
+    "planner": self.memory.read("plan"),
+    "researcher": self.memory.read("research"),
+    "engineer": self.memory.read("code"),
+}
 
         review = self.reviewer.run(reviewer_input)
 

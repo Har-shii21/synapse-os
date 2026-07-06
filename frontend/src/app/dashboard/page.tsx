@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Sidebar from "../../components/dashboard/Sidebar";
+import VoiceButton from "../../components/VoiceButton";
 
 export default function Dashboard() {
   const [task, setTask] = useState("");
@@ -44,8 +45,10 @@ export default function Dashboard() {
     }
   }
 
-  async function runAgent() {
-    if (!task) return;
+  async function runAgent(taskText?: string) {
+    const finalTask = taskText || task;
+
+    if (!finalTask) return;
 
     setLoading(true);
 
@@ -55,7 +58,9 @@ export default function Dashboard() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ task }),
+        body: JSON.stringify({
+          task: finalTask,
+        }),
       });
 
       const data = await response.json();
@@ -79,7 +84,6 @@ export default function Dashboard() {
       <Sidebar />
 
       <section className="flex-1 p-10">
-
         <h1 className="text-4xl font-bold">
           Welcome to Synapse OS
         </h1>
@@ -87,8 +91,6 @@ export default function Dashboard() {
         <p className="mt-3 text-slate-400">
           Your AI team is ready.
         </p>
-
-        {/* Workflow */}
 
         <div className="mt-8 rounded-xl bg-[#0B1120] p-6 border border-white/10">
           <h2 className="text-2xl font-bold">
@@ -119,10 +121,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Task */}
-
         <div className="mt-10">
-
           <textarea
             className="w-full rounded-xl bg-[#0B1120] border border-white/10 p-4"
             rows={5}
@@ -131,22 +130,26 @@ export default function Dashboard() {
             onChange={(e) => setTask(e.target.value)}
           />
 
-          <button
-            onClick={runAgent}
-            className="mt-4 rounded-xl bg-violet-600 px-6 py-3 font-semibold hover:bg-violet-700"
-          >
-            {loading ? "Thinking..." : "Run Agent"}
-          </button>
+          <div className="mt-4 flex gap-3">
+            <VoiceButton
+              onTranscript={(text) => {
+                setTask(text);
+                runAgent(text);
+              }}
+            />
 
+            <button
+              onClick={() => runAgent()}
+              className="rounded-xl bg-violet-600 px-6 py-3 font-semibold hover:bg-violet-700"
+            >
+              {loading ? "Thinking..." : "Run Agent"}
+            </button>
+          </div>
         </div>
-
-        {/* Planner */}
 
         {plan && (
           <div className="mt-8 rounded-xl bg-[#0B1120] p-6">
-            <h2 className="text-2xl font-bold">
-              🧠 Planner
-            </h2>
+            <h2 className="text-2xl font-bold">🧠 Planner</h2>
 
             <pre className="mt-4 whitespace-pre-wrap text-slate-300">
               {plan}
@@ -154,13 +157,9 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Research */}
-
         {research && (
           <div className="mt-8 rounded-xl bg-[#0B1120] p-6">
-            <h2 className="text-2xl font-bold">
-              🔍 Research
-            </h2>
+            <h2 className="text-2xl font-bold">🔍 Research</h2>
 
             <pre className="mt-4 whitespace-pre-wrap text-slate-300">
               {research}
@@ -168,13 +167,9 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Engineer */}
-
         {code && (
           <div className="mt-8 rounded-xl bg-[#0B1120] p-6">
-            <h2 className="text-2xl font-bold">
-              ⚙️ Engineer
-            </h2>
+            <h2 className="text-2xl font-bold">⚙️ Engineer</h2>
 
             <pre className="mt-4 whitespace-pre-wrap text-slate-300">
               {code}
@@ -182,13 +177,9 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Reviewer */}
-
         {review && (
           <div className="mt-8 rounded-xl bg-[#0B1120] p-6">
-            <h2 className="text-2xl font-bold">
-              ✅ Reviewer
-            </h2>
+            <h2 className="text-2xl font-bold">✅ Reviewer</h2>
 
             <pre className="mt-4 whitespace-pre-wrap text-slate-300">
               {review}
@@ -196,15 +187,12 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Memory */}
-
         <div className="mt-8 rounded-xl bg-[#0B1120] p-6">
           <h2 className="text-xl font-bold">
             🧠 Cognitive Memory
           </h2>
 
           <div className="mt-4">
-
             {projects.length === 0 ? (
               <p className="text-slate-400">
                 No previous projects
@@ -219,10 +207,8 @@ export default function Dashboard() {
                 </p>
               ))
             )}
-
           </div>
         </div>
-
       </section>
     </main>
   );

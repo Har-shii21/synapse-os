@@ -50,7 +50,7 @@ def text_to_speech(text, language="en-IN"):
         text=text,
         target_language_code=language,
         model="bulbul:v3",
-        speaker="meera"
+        speaker="priya",
     )
 
     output = "generated_voice.mp3"

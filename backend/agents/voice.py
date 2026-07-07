@@ -85,13 +85,13 @@ class VoiceAgent:
 
             if isinstance(result, dict):
 
-                result["audio_file"] = str(filename)
+                result["audio"] = str(filename)
 
                 return result
 
             return {
                 "success": True,
-                "audio_file": str(filename),
+                "audio": str(filename),
                 "result": result,
             }
 

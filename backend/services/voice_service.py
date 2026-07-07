@@ -61,7 +61,7 @@ class VoiceService:
 
         self.default_language = "en-IN"
 
-        self.default_speaker = "meera"
+        self.default_speaker = "priya"
 
     # =====================================================
     # Speech To Text
@@ -202,14 +202,14 @@ class VoiceService:
                     output_path
                 )
 
-            with open(
-                output_path,
-                "wb",
-            ) as f:
+            audio_data = audio.audios[0]
 
-                f.write(
-                    audio.audios[0]
-                )
+            if isinstance(audio_data, str):
+                import base64
+                audio_data = base64.b64decode(audio_data)
+
+            with open(output_path, "wb") as f:
+                f.write(audio_data)
 
             return {
                 "success": True,
@@ -316,7 +316,10 @@ class VoiceService:
     def available_speakers(self):
 
         return [
-            "meera",
+            "priya",
+            "anushka",
+            "manisha",
+            "vidya",
         ]
 
     def health(self):

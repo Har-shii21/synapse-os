@@ -1,4 +1,5 @@
 import os
+from fastapi.staticfiles import StaticFiles
 
 from fastapi import (
     FastAPI,
@@ -20,6 +21,12 @@ from agents.voice import voice_agent
 app = FastAPI(
     title="Synapse OS API",
     version="1.0.0",
+)
+
+app.mount(
+    "/generated_audio",
+    StaticFiles(directory="generated_audio"),
+    name="generated_audio",
 )
 
 app.add_middleware(

@@ -31,11 +31,9 @@ export default function Dashboard() {
 
   const [task, setTask] = useState("");
 
-  const [loading, setLoading] =
-    useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const [speaking, setSpeaking] =
-    useState(false);
+  const [speaking, setSpeaking] = useState(false);
 
   const [language, setLanguage] =
     useState("en-IN");
@@ -70,6 +68,54 @@ export default function Dashboard() {
   const [error, setError] =
     useState("");
 
+  const AGENTS = [
+    {
+      icon: "🧠",
+      name: "Planner",
+      status:
+        workflow.progress >= 25
+          ? "Completed"
+          : "Waiting",
+    },
+    {
+      icon: "🔍",
+      name: "Researcher",
+      status:
+        workflow.progress >= 50
+          ? "Completed"
+          : "Waiting",
+    },
+    {
+      icon: "⚙️",
+      name: "Engineer",
+      status:
+        workflow.progress >= 75
+          ? "Completed"
+          : "Waiting",
+    },
+    {
+      icon: "✅",
+      name: "Reviewer",
+      status:
+        workflow.progress >= 100
+          ? "Completed"
+          : "Waiting",
+    },
+    {
+      icon: "🎤",
+      name: "Voice",
+      status:
+        speaking
+          ? "Speaking"
+          : "Ready",
+    },
+    {
+      icon: "🧠",
+      name: "Memory",
+      status: "Active",
+    },
+  ];
+
   useEffect(() => {
 
     loadProjects();
@@ -91,17 +137,13 @@ export default function Dashboard() {
     return () => clearInterval(interval);
 
   }, []);
-
   async function loadProjects() {
 
     try {
 
-      const data =
-        await getProjects();
+      const data = await getProjects();
 
-      setProjects(
-        data.projects || []
-      );
+      setProjects(data.projects || []);
 
     } catch (err) {
 
@@ -115,8 +157,7 @@ export default function Dashboard() {
 
     try {
 
-      const data =
-        await getWorkflowStatus();
+      const data = await getWorkflowStatus();
 
       setWorkflow(data);
 
@@ -132,8 +173,7 @@ export default function Dashboard() {
 
     try {
 
-      const data =
-        await getAnalytics();
+      const data = await getAnalytics();
 
       setAnalytics(data);
 
@@ -149,12 +189,9 @@ export default function Dashboard() {
 
     try {
 
-      const data =
-        await getReplay();
+      const data = await getReplay();
 
-      setHistory(
-        data.history || []
-      );
+      setHistory(data.history || []);
 
     } catch (err) {
 
@@ -172,11 +209,10 @@ export default function Dashboard() {
 
       setSpeaking(true);
 
-      const result =
-        await textToSpeech(
-          text,
-          language
-        );
+      const result = await textToSpeech(
+        text,
+        language
+      );
 
       const audio = new Audio(
         `http://127.0.0.1:8000/${result.audio}`
@@ -219,41 +255,29 @@ export default function Dashboard() {
 
     try {
 
-      const result =
-        await runAgent(task);
-        
-        setPlan(
-        result.plan || ""
-      );
+      const result = await runAgent(task);
 
-      setResearch(
-        result.research || ""
-      );
+      setPlan(result.plan || "");
 
-      setCode(
-        result.code || ""
-      );
+      setResearch(result.research || "");
 
-      setReview(
-        result.review || ""
-      );
+      setCode(result.code || "");
 
-      await loadProjects();
+      setReview(result.review || "");
 
-      await loadWorkflow();
-
-      await loadAnalytics();
-
-      await loadReplay();
+      await Promise.all([
+        loadProjects(),
+        loadWorkflow(),
+        loadAnalytics(),
+        loadReplay(),
+      ]);
 
       if (
         autoSpeak &&
         result.review
       ) {
 
-        await speak(
-          result.review
-        );
+        await speak(result.review);
 
       }
 
@@ -281,16 +305,19 @@ export default function Dashboard() {
       <Sidebar />
 
       <section className="flex-1 p-10">
-
-        <h1 className="text-4xl font-bold">
-          Welcome to Synapse OS
+        <h1 className="text-5xl font-bold">
+          🚀 Synapse OS
         </h1>
 
-        <p className="mt-3 text-slate-400">
-          Your AI team is ready.
+        <p className="mt-3 text-lg text-slate-400">
+          Multi-Agent Cognitive Operating System
         </p>
 
-        <div className="mt-8 grid grid-cols-2 gap-6">
+        <p className="mt-2 text-sm text-violet-400">
+          Planner • Researcher • Engineer • Reviewer • Memory • Voice • Knowledge Graph
+        </p>
+
+        <div className="mt-8 grid gap-6 lg:grid-cols-2">
 
           <div className="rounded-xl border border-white/10 bg-[#0B1120] p-6">
 
@@ -298,42 +325,43 @@ export default function Dashboard() {
               📊 Analytics
             </h2>
 
-            <div className="mt-5 space-y-3 text-slate-300">
+            <div className="mt-6 grid grid-cols-2 gap-4">
 
-              <p>
-                Projects :
-                <span className="ml-2 text-violet-400">
+              <div className="rounded-lg bg-slate-900 p-4">
+                <p className="text-sm text-slate-400">
+                  Projects
+                </p>
+                <p className="mt-2 text-3xl font-bold text-violet-400">
                   {analytics.projects_completed ?? 0}
-                </span>
-              </p>
+                </p>
+              </div>
 
-              <p>
-                AI Agents :
-                <span className="ml-2 text-violet-400">
+              <div className="rounded-lg bg-slate-900 p-4">
+                <p className="text-sm text-slate-400">
+                  AI Agents
+                </p>
+                <p className="mt-2 text-3xl font-bold text-violet-400">
                   {analytics.ai_agents ?? 0}
-                </span>
-              </p>
+                </p>
+              </div>
 
-              <p>
-                Memory Nodes :
-                <span className="ml-2 text-violet-400">
+              <div className="rounded-lg bg-slate-900 p-4">
+                <p className="text-sm text-slate-400">
+                  Memory Nodes
+                </p>
+                <p className="mt-2 text-3xl font-bold text-violet-400">
                   {analytics.memory_nodes ?? 0}
-                </span>
-              </p>
+                </p>
+              </div>
 
-              <p>
-                Knowledge Links :
-                <span className="ml-2 text-violet-400">
-                  {analytics.knowledge_links ?? 0}
-                </span>
-              </p>
-
-              <p>
-                Workflow Success :
-                <span className="ml-2 text-green-400">
+              <div className="rounded-lg bg-slate-900 p-4">
+                <p className="text-sm text-slate-400">
+                  Success
+                </p>
+                <p className="mt-2 text-3xl font-bold text-green-400">
                   {analytics.workflow_success ?? "0%"}
-                </span>
-              </p>
+                </p>
+              </div>
 
             </div>
 
@@ -347,10 +375,8 @@ export default function Dashboard() {
                 🚀 Live Workflow
               </h2>
 
-              <span className="text-green-400">
-
+              <span className="text-green-400 text-lg font-bold">
                 {workflow.progress || 0}%
-
               </span>
 
             </div>
@@ -382,6 +408,51 @@ export default function Dashboard() {
 
         </div>
 
+        <div className="mt-8 rounded-xl border border-white/10 bg-[#0B1120] p-6">
+
+          <h2 className="text-2xl font-bold">
+            🤖 AI Team Status
+          </h2>
+
+          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+
+            {AGENTS.map((agent) => (
+
+              <div
+                key={agent.name}
+                className="rounded-xl border border-white/10 bg-slate-900 p-4"
+              >
+
+                <div className="flex items-center justify-between">
+
+                  <span className="font-semibold">
+                    {agent.icon} {agent.name}
+                  </span>
+
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs ${
+                      agent.status === "Completed" ||
+                      agent.status === "Ready" ||
+                      agent.status === "Active"
+                        ? "bg-green-600"
+                        : agent.status === "Speaking"
+                        ? "bg-blue-600"
+                        : "bg-yellow-600"
+                    }`}
+                  >
+                    {agent.status}
+                  </span>
+
+                </div>
+
+              </div>
+
+            ))}
+
+          </div>
+
+        </div>
+
         {error && (
 
           <div className="mt-6 rounded-xl border border-red-500/30 bg-red-900/20 p-4 text-red-300">
@@ -391,23 +462,19 @@ export default function Dashboard() {
           </div>
 
         )}
-
         <div className="mt-8 rounded-xl border border-white/10 bg-[#0B1120] p-6">
 
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-4">
 
             <h2 className="text-xl font-bold">
-
-              Give your AI team a task
-
+              🚀 Give your AI Team a Task
             </h2>
-            <div className="flex items-center gap-3">
+
+            <div className="flex flex-wrap items-center gap-3">
 
               <select
                 value={language}
-                onChange={(e) =>
-                  setLanguage(e.target.value)
-                }
+                onChange={(e) => setLanguage(e.target.value)}
                 className="rounded-lg bg-slate-800 px-4 py-2"
               >
 
@@ -426,7 +493,7 @@ export default function Dashboard() {
 
               </select>
 
-              <label className="flex items-center gap-2 text-sm">
+              <label className="flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm">
 
                 <input
                   type="checkbox"
@@ -436,7 +503,7 @@ export default function Dashboard() {
                   }
                 />
 
-                Auto Speak
+                🔊 Auto Speak
 
               </label>
 
@@ -451,7 +518,7 @@ export default function Dashboard() {
               setTask(e.target.value)
             }
             placeholder="Describe what your AI team should build..."
-            className="mt-5 w-full rounded-xl border border-white/10 bg-[#111827] p-5 outline-none"
+            className="mt-6 w-full rounded-xl border border-white/10 bg-[#111827] p-5 outline-none transition focus:border-violet-500"
           />
 
           <div className="mt-6 flex flex-wrap gap-4">
@@ -471,16 +538,13 @@ export default function Dashboard() {
             >
 
               {loading
-                ? "🤖 Thinking..."
-                : "🚀 Run Agent"}
+                ? "🤖 AI Team Working..."
+                : "🚀 Run AI Team"}
 
             </button>
 
             <button
-              disabled={
-                speaking ||
-                !review
-              }
+              disabled={speaking || !review}
               onClick={() =>
                 speak(review)
               }
@@ -496,21 +560,29 @@ export default function Dashboard() {
           </div>
 
         </div>
-
         {plan && (
 
           <div className="mt-8 rounded-xl border border-white/10 bg-[#0B1120] p-6">
 
-            <h2 className="text-2xl font-bold">
+            <div className="flex items-center justify-between">
 
-              🧠 Planner
+              <h2 className="text-2xl font-bold">
+                🧠 Planner
+              </h2>
 
-            </h2>
+              <button
+                onClick={() =>
+                  navigator.clipboard.writeText(plan)
+                }
+                className="rounded-lg bg-slate-700 px-4 py-2 hover:bg-slate-600"
+              >
+                📋 Copy
+              </button>
+
+            </div>
 
             <pre className="mt-5 whitespace-pre-wrap text-slate-300">
-
               {plan}
-
             </pre>
 
           </div>
@@ -521,16 +593,25 @@ export default function Dashboard() {
 
           <div className="mt-8 rounded-xl border border-white/10 bg-[#0B1120] p-6">
 
-            <h2 className="text-2xl font-bold">
+            <div className="flex items-center justify-between">
 
-              🔍 Research
+              <h2 className="text-2xl font-bold">
+                🔍 Research
+              </h2>
 
-            </h2>
+              <button
+                onClick={() =>
+                  navigator.clipboard.writeText(research)
+                }
+                className="rounded-lg bg-slate-700 px-4 py-2 hover:bg-slate-600"
+              >
+                📋 Copy
+              </button>
+
+            </div>
 
             <pre className="mt-5 whitespace-pre-wrap text-slate-300">
-
               {research}
-
             </pre>
 
           </div>
@@ -541,16 +622,25 @@ export default function Dashboard() {
 
           <div className="mt-8 rounded-xl border border-white/10 bg-[#0B1120] p-6">
 
-            <h2 className="text-2xl font-bold">
+            <div className="flex items-center justify-between">
 
-              ⚙️ Engineer
+              <h2 className="text-2xl font-bold">
+                ⚙️ Engineer
+              </h2>
 
-            </h2>
+              <button
+                onClick={() =>
+                  navigator.clipboard.writeText(code)
+                }
+                className="rounded-lg bg-slate-700 px-4 py-2 hover:bg-slate-600"
+              >
+                📋 Copy
+              </button>
+
+            </div>
 
             <pre className="mt-5 whitespace-pre-wrap text-slate-300">
-
               {code}
-
             </pre>
 
           </div>
@@ -564,44 +654,49 @@ export default function Dashboard() {
             <div className="flex items-center justify-between">
 
               <h2 className="text-2xl font-bold">
-
                 ✅ Reviewer
-
               </h2>
 
-              <button
-                onClick={() =>
-                  speak(review)
-                }
-                disabled={speaking}
-                className="rounded-lg bg-blue-600 px-4 py-2 hover:bg-blue-700 disabled:opacity-50"
-              >
+              <div className="flex gap-3">
 
-                {speaking
-                  ? "🔊 Speaking..."
-                  : "🔊 Replay"}
+                <button
+                  onClick={() =>
+                    navigator.clipboard.writeText(review)
+                  }
+                  className="rounded-lg bg-slate-700 px-4 py-2 hover:bg-slate-600"
+                >
+                  📋 Copy
+                </button>
 
-              </button>
+                <button
+                  onClick={() =>
+                    speak(review)
+                  }
+                  disabled={speaking}
+                  className="rounded-lg bg-blue-600 px-4 py-2 hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {speaking
+                    ? "🔊 Speaking..."
+                    : "🔊 Replay"}
+                </button>
+
+              </div>
 
             </div>
 
             <pre className="mt-5 whitespace-pre-wrap text-slate-300">
-
               {review}
-
             </pre>
 
           </div>
 
         )}
-        <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
+        <div className="mt-8 grid gap-8 lg:grid-cols-2">
 
           <div className="rounded-xl border border-white/10 bg-[#0B1120] p-6">
 
             <h2 className="text-xl font-bold">
-
               🧠 Cognitive Memory
-
             </h2>
 
             <div className="mt-5">
@@ -609,9 +704,7 @@ export default function Dashboard() {
               {projects.length === 0 ? (
 
                 <p className="text-slate-400">
-
                   No previous projects yet.
-
                 </p>
 
               ) : (
@@ -624,9 +717,7 @@ export default function Dashboard() {
                   >
 
                     <p className="text-slate-300">
-
                       • {project}
-
                     </p>
 
                   </div>
@@ -642,9 +733,7 @@ export default function Dashboard() {
           <div className="rounded-xl border border-white/10 bg-[#0B1120] p-6">
 
             <h2 className="text-xl font-bold">
-
               🔄 Workflow Replay
-
             </h2>
 
             <div className="mt-5 max-h-[450px] overflow-y-auto">
@@ -652,9 +741,7 @@ export default function Dashboard() {
               {history.length === 0 ? (
 
                 <p className="text-slate-400">
-
                   No workflow history yet.
-
                 </p>
 
               ) : (
@@ -667,23 +754,17 @@ export default function Dashboard() {
                   >
 
                     <h3 className="font-semibold text-violet-400">
-
                       {item.task}
-
                     </h3>
 
                     <details className="mt-3">
 
                       <summary className="cursor-pointer text-slate-300">
-
-                        Planner
-
+                        🧠 Planner
                       </summary>
 
                       <pre className="mt-2 whitespace-pre-wrap text-sm text-slate-400">
-
                         {item.plan}
-
                       </pre>
 
                     </details>
@@ -691,15 +772,11 @@ export default function Dashboard() {
                     <details className="mt-3">
 
                       <summary className="cursor-pointer text-slate-300">
-
-                        Engineer
-
+                        ⚙️ Engineer
                       </summary>
 
                       <pre className="mt-2 whitespace-pre-wrap text-sm text-slate-400">
-
                         {item.execution}
-
                       </pre>
 
                     </details>
@@ -707,15 +784,11 @@ export default function Dashboard() {
                     <details className="mt-3">
 
                       <summary className="cursor-pointer text-slate-300">
-
-                        Reviewer
-
+                        ✅ Reviewer
                       </summary>
 
                       <pre className="mt-2 whitespace-pre-wrap text-sm text-slate-400">
-
                         {item.review}
-
                       </pre>
 
                     </details>

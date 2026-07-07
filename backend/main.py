@@ -149,10 +149,10 @@ def run_agent(request: TaskRequest):
             detail=str(e),
         )
     
-    @app.get("/workflow-status")
-    def workflow_status():
+@app.get("/workflow-status")
+def workflow_status():
 
-        return get_state()
+    return get_state()
 
 
 @app.get("/agent-status")
@@ -333,15 +333,10 @@ def translate(request: TranslateRequest):
 
     try:
 
-        translated = voice_agent.translate(
-            request.text,
-            request.target_language,
-        )
-
-        return {
-            "success": True,
-            "translated_text": translated,
-        }
+        return voice_agent.translate(
+    request.text,
+    request.target_language,
+)
 
     except Exception as e:
 

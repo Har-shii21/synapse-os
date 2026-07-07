@@ -23,6 +23,11 @@ app = FastAPI(
     version="1.0.0",
 )
 
+import os
+
+print("Current Working Directory:", os.getcwd())
+print("Generated audio exists:", os.path.exists("generated_audio"))
+
 app.mount(
     "/generated_audio",
     StaticFiles(directory="generated_audio"),

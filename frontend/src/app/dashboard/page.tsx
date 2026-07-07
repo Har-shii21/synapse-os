@@ -132,7 +132,7 @@ export default function Dashboard() {
 
       loadAnalytics();
 
-    }, 6000);
+    }, 5000);
 
     return () => clearInterval(interval);
 

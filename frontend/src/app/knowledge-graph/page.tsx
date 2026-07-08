@@ -34,15 +34,9 @@ export default function KnowledgeGraphPage() {
 
   useEffect(() => {
 
-    loadGraph();
+  loadGraph();
 
-    const interval =
-      setInterval(loadGraph, 3000);
-
-    return () =>
-      clearInterval(interval);
-
-  }, []);
+}, []);
 
   async function loadGraph() {
 
@@ -206,6 +200,17 @@ if (node.type === "Project") {
         <h1 className="text-4xl font-bold">
           🔗 Live Knowledge Graph
         </h1>
+
+        <div className="mt-5">
+
+  <button
+    onClick={loadGraph}
+    className="rounded-lg bg-violet-600 px-5 py-2 hover:bg-violet-700"
+  >
+    🔄 Refresh Graph
+  </button>
+
+</div>
 
         <p className="mt-3 text-slate-400">
           Real-time cognitive network generated from Neo4j.

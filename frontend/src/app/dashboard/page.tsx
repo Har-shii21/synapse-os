@@ -37,6 +37,9 @@ export default function Dashboard() {
 
   const [speaking, setSpeaking] = useState(false);
 
+  const [audioPlayer, setAudioPlayer] =
+  useState<HTMLAudioElement | null>(null);
+
   const [language, setLanguage] =
     useState("en-IN");
 
@@ -259,6 +262,8 @@ async function loadKnowledgeGraph() {
         `http://127.0.0.1:8000/${result.audio}`
       );
 
+      setAudioPlayer(audio);
+
       audio.onended = () => {
 
         setSpeaking(false);
@@ -276,6 +281,20 @@ async function loadKnowledgeGraph() {
     }
 
   }
+
+  function stopSpeaking() {
+
+  if (audioPlayer) {
+
+    audioPlayer.pause();
+
+    audioPlayer.currentTime = 0;
+
+    setSpeaking(false);
+
+  }
+
+}
 
   async function handleRunAgent() {
 
@@ -597,6 +616,14 @@ async function loadKnowledgeGraph() {
                 : "🔊 Speak Review"}
 
             </button>
+
+            <button
+  onClick={stopSpeaking}
+  disabled={!speaking}
+  className="rounded-xl bg-red-600 px-6 py-3 font-semibold transition hover:bg-red-700 disabled:opacity-60"
+>
+  🛑 Stop Speaking
+</button>
 
           </div>
 

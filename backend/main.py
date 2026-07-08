@@ -168,9 +168,15 @@ def workflow_status():
 
 
 @app.get("/agent-status")
-def agent_status():
+def get_agent_status():
 
-    return get_status()
+    return {
+        "planner": "idle",
+        "researcher": "idle",
+        "engineer": "idle",
+        "security": "idle",
+        "analyst": "idle"
+    }
 
 
 @app.get("/projects")

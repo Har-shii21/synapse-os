@@ -5,35 +5,43 @@ async function request(
   endpoint: string,
   options?: RequestInit
 ) {
+  try {
 
-  const response = await fetch(
-    `${API_URL}${endpoint}`,
-    options
-  );
+    const response = await fetch(
+      `${API_URL}${endpoint}`,
+      options
+    );
 
-  if (!response.ok) {
+    if (!response.ok) {
 
-    let message = "Request failed";
+      let message = "Request failed";
 
-    try {
+      try {
 
-      const error =
-        await response.json();
+        const error = await response.json();
 
-      message =
-        error.detail ||
-        error.error ||
-        message;
+        message =
+          error.detail ||
+          error.error ||
+          message;
 
-    } catch {}
+      } catch {}
 
-    throw new Error(message);
+      throw new Error(message);
+
+    }
+
+    return await response.json();
+
+  } catch (err) {
+
+    console.error("API Error:", err);
+
+    return null;
 
   }
-
-  return response.json();
-
 }
+
 
 export async function runAgent(
   task: string

@@ -87,14 +87,22 @@ export default function KnowledgeGraphPage() {
 
         }
 
-        if (node.type === "Project") {
+        const projects = graph.nodes.filter(
+  (n: any) => n.type === "Project"
+);
 
-          position = {
-            x: 500,
-            y: 450,
-          };
+if (node.type === "Project") {
 
-        }
+  const index = projects.findIndex(
+    (p: any) => p.id === node.id
+  );
+
+  position = {
+    x: 120 + (index % 4) * 220,
+    y: 430 + Math.floor(index / 4) * 150,
+  };
+
+}
 
         let background = "#6D28D9";
 
@@ -272,13 +280,18 @@ export default function KnowledgeGraphPage() {
           ) : (
 
             <ReactFlow
-              nodes={nodes}
-              edges={edges}
-              fitView
-              fitViewOptions={{
-                padding: 0.2,
-              }}
-            >
+  nodes={nodes}
+  edges={edges}
+  fitView
+  fitViewOptions={{
+    padding: 0.4,
+  }}
+  defaultViewport={{
+    x: 0,
+    y: 0,
+    zoom: 0.75,
+  }}
+>
 
               <MiniMap
                 zoomable

@@ -11,6 +11,8 @@ import {
   getWorkflowStatus,
   getAnalytics,
   getReplay,
+  getAgentStatus,
+  getKnowledgeGraph,
   textToSpeech,
 } from "../../lib/api";
 
@@ -68,53 +70,60 @@ export default function Dashboard() {
   const [error, setError] =
     useState("");
 
+  const [agentStatus, setAgentStatus] = useState<any>({});
+  const [graph, setGraph] = useState<any>({
+  nodes: [],
+  edges: [],
+});
+
   const AGENTS = [
-    {
-      icon: "🧠",
-      name: "Planner",
-      status:
-        workflow.progress >= 25
-          ? "Completed"
-          : "Waiting",
-    },
-    {
-      icon: "🔍",
-      name: "Researcher",
-      status:
-        workflow.progress >= 50
-          ? "Completed"
-          : "Waiting",
-    },
-    {
-      icon: "⚙️",
-      name: "Engineer",
-      status:
-        workflow.progress >= 75
-          ? "Completed"
-          : "Waiting",
-    },
-    {
-      icon: "✅",
-      name: "Reviewer",
-      status:
-        workflow.progress >= 100
-          ? "Completed"
-          : "Waiting",
-    },
-    {
-      icon: "🎤",
-      name: "Voice",
-      status:
-        speaking
-          ? "Speaking"
-          : "Ready",
-    },
-    {
-      icon: "🧠",
-      name: "Memory",
-      status: "Active",
-    },
-  ];
+  {
+    icon: "🧠",
+    name: "Planner",
+    status: agentStatus.planner || "Idle",
+  },
+  {
+    icon: "🔍",
+    name: "Researcher",
+    status: agentStatus.researcher || "Idle",
+  },
+  {
+    icon: "⚙️",
+    name: "Engineer",
+    status: agentStatus.engineer || "Idle",
+  },
+  {
+    icon: "🛡️",
+    name: "Security",
+    status: agentStatus.security || "Idle",
+  },
+  {
+    icon: "📊",
+    name: "Analyst",
+    status: agentStatus.analyst || "Idle",
+  },
+  {
+    icon: "✅",
+    name: "Reviewer",
+    status:
+      workflow.progress === 100
+        ? "Completed"
+        : "Waiting",
+  },
+  {
+    icon: "🎤",
+    name: "Voice",
+    status:
+      speaking
+        ? "Speaking"
+        : "Ready",
+  },
+  {
+    icon: "🧠",
+    name: "Memory",
+    status: "Active",
+  },
+];
 
   useEffect(() => {
 
@@ -126,11 +135,19 @@ export default function Dashboard() {
 
     loadReplay();
 
+    loadAgentStatus();
+
+    loadKnowledgeGraph();
+
     const interval = setInterval(() => {
 
       loadWorkflow();
 
       loadAnalytics();
+
+      loadAgentStatus();
+
+      loadKnowledgeGraph();
 
     }, 5000);
 
@@ -200,6 +217,30 @@ export default function Dashboard() {
     }
 
   }
+
+  async function loadAgentStatus() {
+
+  const data = await getAgentStatus();
+
+  if (data) {
+
+    setAgentStatus(data);
+
+  }
+
+}
+
+async function loadKnowledgeGraph() {
+
+  const data = await getKnowledgeGraph();
+
+  if (data) {
+
+    setGraph(data);
+
+  }
+
+}
 
   async function speak(text: string) {
 

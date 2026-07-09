@@ -72,10 +72,7 @@ class VoiceAgent:
 
         try:
 
-            filename = (
-                self.audio_directory
-                / f"{uuid.uuid4().hex}.mp3"
-            )
+            filename = self.audio_directory / f"{uuid.uuid4().hex}.mp3"
 
             result = voice_service.text_to_speech(
                 text=text,
@@ -83,15 +80,15 @@ class VoiceAgent:
                 output_path=str(filename),
             )
 
+            audio_url = f"/generated_audio/{filename.name}"
+
             if isinstance(result, dict):
-
-                result["audio"] = str(filename)
-
+                result["audio"] = audio_url
                 return result
 
             return {
                 "success": True,
-                "audio": str(filename),
+                "audio": audio_url,
                 "result": result,
             }
 

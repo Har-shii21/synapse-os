@@ -1,28 +1,16 @@
-from services.sarvam_service import SarvamService
+from sarvam.client import ask_analyst
+from memory.state import update_state
 
 
 class AnalystAgent:
 
     def __init__(self):
-        self.llm = SarvamService()
+        self.name = "Analyst Agent"
 
     def run(self, input_text):
 
-        prompt = f"""
-You are an AI Analyst.
+        response = ask_analyst(input_text)
 
-Analyze the completed project and provide:
+        update_state("analyst", "completed")
 
-1. Project quality
-2. Completeness
-3. Performance
-4. Scalability
-5. Estimated success rate
-6. Overall score out of 10
-
-Project:
-
-{input_text}
-"""
-
-        return self.llm.chat(prompt)
+        return response

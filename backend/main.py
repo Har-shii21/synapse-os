@@ -58,7 +58,7 @@ class VoiceRequest(BaseModel):
 
 class TranslateRequest(BaseModel):
     text: str
-    target_language: str
+    language: str = "en-IN"
 
 
 workflow_history = []

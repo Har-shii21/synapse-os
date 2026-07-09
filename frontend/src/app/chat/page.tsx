@@ -26,80 +26,86 @@ export default function ChatPage() {
 
   const [chat, setChat] =
     useState<any[]>([]);
+    
     async function sendMessage() {
+  if (!message.trim() || loading) return;
 
-    if (
-      !message.trim() ||
-      loading
-    )
-      return;
+  const userMessage = {
+    sender: "You",
+    text: message,
+  };
 
-    const userMessage = {
-      sender: "You",
-      text: message,
-    };
+  setChat((prev) => [...prev, userMessage]);
+
+  setLoading(true);
+
+  try {
+    const response = await fetch(
+      "http://127.0.0.1:8000/run-agent",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          task: message,
+          agent: agent,
+        }),
+      }
+    );
+
+    const result = await response.json();
+
+    let reply = "No response";
+
+    switch (agent) {
+      case "Planner":
+        reply = result.plan;
+        break;
+
+      case "Researcher":
+        reply = result.research;
+        break;
+
+      case "Engineer":
+        reply = result.code;
+        break;
+
+      case "Security":
+        reply = result.security;
+        break;
+
+      case "Analyst":
+        reply = result.analysis;
+        break;
+
+      case "Reviewer":
+        reply = result.review;
+        break;
+    }
 
     setChat((prev) => [
       ...prev,
-      userMessage,
-    ]);
-
-    setLoading(true);
-
-    try {
-
-      const response = await fetch(
-        "http://127.0.0.1:8000/run-agent",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-          body: JSON.stringify({
-            task: `[${agent}] ${message}`,
-          }),
-        }
-      );
-
-      const result =
-        await response.json();
-
-      const agentReply = {
+      {
         sender: agent,
-        text:
-          result.review ||
-          result.code ||
-          result.plan ||
-          "No response",
-      };
+        text: reply || "No response",
+      },
+    ]);
+  } catch (error) {
+    console.error(error);
 
-      setChat((prev) => [
-        ...prev,
-        agentReply,
-      ]);
-
-    } catch (error) {
-
-      console.error(error);
-
-      setChat((prev) => [
-        ...prev,
-        {
-          sender: "System",
-          text: "Failed to contact backend.",
-        },
-      ]);
-
-    } finally {
-
-      setLoading(false);
-
-      setMessage("");
-
-    }
-
+    setChat((prev) => [
+      ...prev,
+      {
+        sender: "System",
+        text: "Failed to contact backend.",
+      },
+    ]);
+  } finally {
+    setLoading(false);
+    setMessage("");
   }
+}
 
   return (
 

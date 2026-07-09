@@ -37,23 +37,20 @@ async function request(
 
     console.error("API Error:", err);
 
-    return null;
+    return err;
 
   }
 }
 
 
-export async function runAgent(
-  task: string
-) {
+export async function runAgent(task: string) {
 
-  return request(
+  const result = await request(
     "/run-agent",
     {
       method: "POST",
       headers: {
-        "Content-Type":
-          "application/json",
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         task,
@@ -61,6 +58,9 @@ export async function runAgent(
     }
   );
 
+  console.log("Backend Response:", result);
+
+  return result;
 }
 
 export async function getProjects() {

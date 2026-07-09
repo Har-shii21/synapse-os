@@ -158,30 +158,24 @@ class VoiceService:
     ):
 
         if not text.strip():
-
             return {
                 "success": False,
                 "error": "Text is empty.",
             }
 
-        if not self.validate_language(
-            language
-        ):
+        if not self.validate_language(language):
+            language = self.default_language
 
-            language = (
-                self.default_language
-            )
-
-        speaker = (
-            speaker
-            or self.default_speaker
-        )
+        speaker = speaker or self.default_speaker
 
         try:
 
-            logger.info(
-                f"Text → Speech ({language})"
-            )
+            logger.info(f"Text → Speech ({language})")
+
+            MAX_LENGTH = 2400
+
+            if len(text) > MAX_LENGTH:
+                text = text[MAX_LENGTH]
 
             audio = client.text_to_speech.convert(
                 text=text,
@@ -189,18 +183,11 @@ class VoiceService:
                 model="bulbul:v3",
                 speaker=speaker,
             )
+
             if output_path is None:
-
-                output_path = (
-                    self.output_dir
-                    / f"{uuid.uuid4().hex}.mp3"
-                )
-
+                output_path = self.output_dir / f"{uuid.uuid4().hex}.mp3"
             else:
-
-                output_path = Path(
-                    output_path
-                )
+                output_path = Path(output_path)
 
             audio_data = audio.audios[0]
 
@@ -213,7 +200,7 @@ class VoiceService:
 
             return {
                 "success": True,
-                "audio": str(output_path),
+                "audio": f"/generated_audio/{output_path.name}",
                 "speaker": speaker,
                 "language": language,
             }

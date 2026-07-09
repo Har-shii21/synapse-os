@@ -65,10 +65,16 @@ export default function Dashboard() {
     useState("");
 
   const [code, setCode] =
-    useState("");
+  useState("");
 
-  const [review, setReview] =
-    useState("");
+const [security, setSecurity] =
+  useState("");
+
+const [analysis, setAnalysis] =
+  useState("");
+
+const [review, setReview] =
+  useState("");
 
   const [error, setError] =
     useState("");
@@ -247,40 +253,37 @@ async function loadKnowledgeGraph() {
 
   async function speak(text: string) {
 
-    if (!text) return;
+  if (!text) return;
 
-    try {
+  try {
 
-      setSpeaking(true);
+    setSpeaking(true);
 
-      const result = await textToSpeech(
-        text,
-        language
-      );
+    const result = await textToSpeech(text, language);
 
-      const audio = new Audio(
-        `http://127.0.0.1:8000/${result.audio}`
-      );
+    console.log(result);
+    console.log(result.audio);
 
-      setAudioPlayer(audio);
+    const audio = new Audio(
+      "http://127.0.0.1:8000" + result.audio
+    );
 
-      audio.onended = () => {
+    setAudioPlayer(audio);
 
-        setSpeaking(false);
-
-      };
-
-      await audio.play();
-
-    } catch (err) {
-
-      console.error(err);
-
+    audio.onended = () => {
       setSpeaking(false);
+    };
 
-    }
+    await audio.play();
+
+  } catch (err) {
+
+    console.error(err);
+    setSpeaking(false);
 
   }
+
+}
 
   function stopSpeaking() {
 
@@ -311,19 +314,26 @@ async function loadKnowledgeGraph() {
 
     setCode("");
 
+    setSecurity("");
+
+    setAnalysis("");
+
     setReview("");
 
     try {
 
       const result = await runAgent(task);
 
-      setPlan(result.plan || "");
+if (!result) {
+  throw new Error("No response received from backend.");
+}
 
-      setResearch(result.research || "");
-
-      setCode(result.code || "");
-
-      setReview(result.review || "");
+setPlan(result.plan ?? "");
+setResearch(result.research ?? "");
+setCode(result.code ?? "");
+setSecurity(result.security ?? "");
+setAnalysis(result.analysis ?? "");
+setReview(result.review ?? "");
 
       await Promise.all([
         loadProjects(),
@@ -337,7 +347,7 @@ async function loadKnowledgeGraph() {
         result.review
       ) {
 
-        await speak(result.review);
+        await speak(result.review.slice(0,2400));
 
       }
 
@@ -714,6 +724,64 @@ async function loadKnowledgeGraph() {
           </div>
 
         )}
+
+        {security && (
+
+  <div className="mt-8 rounded-xl border border-white/10 bg-[#0B1120] p-6">
+
+    <div className="flex items-center justify-between">
+
+      <h2 className="text-2xl font-bold">
+        🛡 Security
+      </h2>
+
+      <button
+        onClick={() =>
+          navigator.clipboard.writeText(security)
+        }
+        className="rounded-lg bg-slate-700 px-4 py-2 hover:bg-slate-600"
+      >
+        📋 Copy
+      </button>
+
+    </div>
+
+    <pre className="mt-5 whitespace-pre-wrap text-slate-300">
+      {security}
+    </pre>
+
+  </div>
+
+)}
+
+{analysis && (
+
+  <div className="mt-8 rounded-xl border border-white/10 bg-[#0B1120] p-6">
+
+    <div className="flex items-center justify-between">
+
+      <h2 className="text-2xl font-bold">
+        📊 Analyst
+      </h2>
+
+      <button
+        onClick={() =>
+          navigator.clipboard.writeText(analysis)
+        }
+        className="rounded-lg bg-slate-700 px-4 py-2 hover:bg-slate-600"
+      >
+        📋 Copy
+      </button>
+
+    </div>
+
+    <pre className="mt-5 whitespace-pre-wrap text-slate-300">
+      {analysis}
+    </pre>
+
+  </div>
+
+)}
 
         {review && (
 

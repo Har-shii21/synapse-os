@@ -1,27 +1,16 @@
-from services.sarvam_service import SarvamService
+from sarvam.client import ask_security
+from memory.state import update_state
 
 
 class SecurityAgent:
 
     def __init__(self):
-        self.llm = SarvamService()
+        self.name = "Security Agent"
 
     def run(self, input_text):
 
-        prompt = f"""
-You are a Security AI Agent.
+        response = ask_security(input_text)
 
-Review the following project and identify:
+        update_state("security", "completed")
 
-1. Security vulnerabilities
-2. Authentication issues
-3. Data privacy concerns
-4. Best security practices
-5. Suggestions to improve security
-
-Project:
-
-{input_text}
-"""
-
-        return self.llm.chat(prompt)
+        return response

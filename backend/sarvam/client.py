@@ -126,3 +126,63 @@ Maximum 100 words.
     )
 
     return response.choices[0].message.content
+
+def ask_security(prompt: str):
+
+    response = client.chat.completions(
+        model="sarvam-30b",
+        max_tokens=2500,
+        messages=[
+            {
+                "role": "system",
+                "content": """
+You are Security Agent.
+
+Return only:
+- Security Risks
+- Vulnerabilities
+- Authentication Suggestions
+- Best Practices
+
+Maximum 150 words.
+"""
+            },
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ]
+    )
+
+    return response.choices[0].message.content
+
+
+def ask_analyst(prompt: str):
+
+    response = client.chat.completions(
+        model="sarvam-30b",
+        max_tokens=2500,
+        messages=[
+            {
+                "role": "system",
+                "content": """
+You are Analyst Agent.
+
+Return only:
+- Project Summary
+- Estimated Complexity
+- Estimated Timeline
+- Success Probability
+- Final Recommendation
+
+Maximum 150 words.
+"""
+            },
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ]
+    )
+
+    return response.choices[0].message.content

@@ -198,7 +198,6 @@ NEO4J_PASSWORD=YOUR_PASSWORD
 ## 🚀 Future Enhancements
 
 - Multi-user Authentication
-- Cloud Deployment
 - Agent Collaboration History
 - Docker Support
 - Real-Time Notifications

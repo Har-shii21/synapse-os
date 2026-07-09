@@ -8,6 +8,11 @@ __pycache__/
 venv/
 .venv/
 
+# Audio
+generated_audio/
+**/generated_audio/
+backend/generated_audio/
+
 # Next.js
 node_modules/
 .next/

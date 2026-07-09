@@ -9,7 +9,7 @@ export default function ReplayPage() {
   useEffect(() => {
     async function loadReplay() {
       try {
-        const res = await fetch("http://127.0.0.1:8000/replay");
+        const res = await fetch("https://synapse-os-backend.onrender.com/replay");
         const data = await res.json();
         setHistory(data.history || []);
       } catch (err) {
@@ -24,7 +24,7 @@ export default function ReplayPage() {
   }, []);
 
   async function replayWorkflow(item: any) {
-    await fetch("http://127.0.0.1:8000/run-agent", {
+    await fetch("https://synapse-os-backend.onrender.com/run-agent", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

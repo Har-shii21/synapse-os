@@ -41,7 +41,7 @@ export default function ChatPage() {
 
   try {
     const response = await fetch(
-      "http://127.0.0.1:8000/run-agent",
+      "https://synapse-os-backend.onrender.com/run-agent",
       {
         method: "POST",
         headers: {

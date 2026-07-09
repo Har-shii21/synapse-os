@@ -65,7 +65,7 @@ export default function TeamRoom() {
     { sender: "System", text: "🧠 Agents are thinking..." },
   ]);
 
-  const res = await fetch("http://localhost:8000/run-agent", {
+  const res = await fetch("https://synapse-os-backend.onrender.com/run-agent", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

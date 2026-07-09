@@ -8,7 +8,7 @@ export default function MemoryPage() {
 
   useEffect(() => {
     async function loadProjects() {
-      const response = await fetch("http://127.0.0.1:8000/projects");
+      const response = await fetch("https://synapse-os-backend.onrender.com/projects");
       const data = await response.json();
       setProjects(data.projects);
     }

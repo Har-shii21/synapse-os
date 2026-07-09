@@ -46,7 +46,7 @@ export default function KnowledgeGraphPage() {
 
       const response =
         await fetch(
-          "http://127.0.0.1:8000/knowledge-graph"
+          "https://synapse-os-backend.onrender.com/knowledge-graph"
         );
 
       const graph =

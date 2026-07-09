@@ -71,7 +71,7 @@ export default function AgentsPage() {
 
       const response =
         await fetch(
-          "http://127.0.0.1:8000/workflow-status"
+          "https://synapse-os-backend.onrender.com/workflow-status"
         );
 
       const data =

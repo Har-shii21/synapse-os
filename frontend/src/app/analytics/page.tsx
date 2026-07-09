@@ -9,7 +9,7 @@ export default function AnalyticsPage() {
   useEffect(() => {
     async function loadAnalytics() {
       try {
-        const res = await fetch("http://127.0.0.1:8000/analytics");
+        const res = await fetch("https://synapse-os-backend.onrender.com/analytics");
         const data = await res.json();
         setStats(data);
       } catch (err) {

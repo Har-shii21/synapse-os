@@ -265,7 +265,7 @@ async function loadKnowledgeGraph() {
     console.log(result.audio);
 
     const audio = new Audio(
-      "http://127.0.0.1:8000" + result.audio
+      "https://synapse-os-backend.onrender.com" + result.audio
     );
 
     setAudioPlayer(audio);

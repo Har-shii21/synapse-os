@@ -1,5 +1,5 @@
 const API_URL =
-  "http://127.0.0.1:8000";
+  "https://synapse-os-backend.onrender.com";
 
 async function request(
   endpoint: string,
